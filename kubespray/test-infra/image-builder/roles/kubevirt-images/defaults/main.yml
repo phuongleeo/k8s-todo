@@ -1,0 +1,73 @@
+---
+images_dir: /images/base
+
+docker_user: kubespray+buildvmimages
+docker_host: quay.io
+registry: quay.io/kubespray
+
+images:
+  ubuntu-1604:
+    filename: xenial-server-cloudimg-amd64-disk1.img
+    url: https://storage.googleapis.com/kubespray-images/ubuntu/xenial-server-cloudimg-amd64-disk1.img
+    checksum: sha256:c0d099383cd064390b568e20d1c39a9c68ba864764404b70f754a7b1b2f808f7
+    converted: false
+
+  ubuntu-1804:
+    filename: bionic-server-cloudimg-amd64.img
+    url: https://cloud-images.ubuntu.com/bionic/current/bionic-server-cloudimg-amd64.img
+    checksum: sha256:c3d0e03f4245ffaabd7647e6dabf346b944a62b9934d0a89f3a04b4236386af2
+    converted: false
+
+  ubuntu-2004-20200325:
+    filename: focal-server-cloudimg-amd64.img
+    url: https://cloud-images.ubuntu.com/focal/20200325/focal-server-cloudimg-amd64.img
+    checksum: sha256:1b140c41cdd372b42d179111211a61f5b0f1c74ff9ef04be10806a083aba596c
+    converted: false
+
+  fedora-30:
+    filename: Fedora-Cloud-Base-30-1.2.x86_64.qcow2
+    url: https://download.fedoraproject.org/pub/fedora/linux/releases/30/Cloud/x86_64/images/Fedora-Cloud-Base-30-1.2.x86_64.qcow2
+    checksum: sha256:72b6ae7b4ed09a4dccd6e966e1b3ac69bd97da419de9760b410e837ba00b4e26
+    converted: true
+
+  fedora-31:
+    filename: Fedora-Cloud-Base-31-1.9.x86_64.qcow2
+    url: https://download.fedoraproject.org/pub/fedora/linux/releases/31/Cloud/x86_64/images/Fedora-Cloud-Base-31-1.9.x86_64.qcow2
+    checksum: sha256:e3c1b309d9203604922d6e255c2c5d098a309c2d46215d8fc026954f3c5c27a0
+    converted: true
+
+  centos-7:
+    filename: CentOS-7-x86_64-GenericCloud-1809.qcow2
+    url: http://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud-1809.qcow2
+    checksum: sha256:42c062df8a8c36991ec0282009dd52ac488461a3f7ee114fc21a765bfc2671c2
+    converted: true
+
+  centos-8:
+    filename: CentOS-8-GenericCloud-8.1.1911-20200113.3.x86_64.qcow2
+    url: http://cloud.centos.org/centos/8/x86_64/images/CentOS-8-GenericCloud-8.1.1911-20200113.3.x86_64.qcow2
+    checksum: sha256:e2cf1081645b1089f574918fb808b32d247169ec4ec1a13bca9e14a74df6530e
+    converted: true
+
+  debian-9:
+    filename: debian-9-openstack-amd64.qcow2
+    url: https://cdimage.debian.org/cdimage/openstack/current-9/debian-9-openstack-amd64.qcow2
+    checksum: sha256:01d9345ba7a6523d214d2eaabe07fe7b4b69b28e63d7a6b322521e99e5768719
+    converted: true
+
+  debian-10:
+    filename: debian-10-openstack-amd64.qcow2
+    url: https://cdimage.debian.org/cdimage/openstack/current-10/debian-10-openstack-amd64.qcow2
+    checksum: sha512:296ad8345cb49e52464a0cb8bf4365eb0b9e4220c47ebdd73d134d51effc756d5554aee15027fffd038fef4ad5fa984c94208bce60572d58b2ab26f74bb2a5de
+    converted: true
+
+  oracle-7:
+    filename: oracle-linux-76.qcow2
+    url: https://storage.googleapis.com/born-images/oracle76/oracle-linux-76.qcow2
+    checksum: sha256:f396c03e907fa2a0c94d6807b9f62622f23ee3499df4456ae2a15da381fbdca5
+    converted: true
+
+  opensuse-leap-15:
+    filename: openSUSE-Leap-15.1-OpenStack.x86_64-0.0.4-Build6.106.qcow2
+    url: https://download.opensuse.org/repositories/Cloud:/Images:/Leap_15.1/images/openSUSE-Leap-15.1-OpenStack.x86_64-0.0.4-Build6.106.qcow2
+    checksum: sha256:e3c016a889505c5ae51dafe6eedc836a9e9546ab951fdc96f07eb35e34d12b8c
+    converted: true
