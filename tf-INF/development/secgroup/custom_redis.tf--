@@ -1,0 +1,8 @@
+resource "aws_security_group_rule" "eks" {
+  type              = "ingress"
+  from_port         = 6379
+  to_port           = 6379
+  protocol          = "tcp"
+  cidr_blocks       = [local.svc_cidr, local.prod_cidr]
+  security_group_id = lookup(local.redis_sg, "hive")
+}
