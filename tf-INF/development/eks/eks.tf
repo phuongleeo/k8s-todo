@@ -30,11 +30,11 @@ resource "aws_security_group" "all_worker_mgmt" {
   }
 }
 data "aws_eks_cluster" "production" {
-  name = module.honestbee_production.cluster_id
+  name = module.eks_production.cluster_id
 }
 
 data "aws_eks_cluster_auth" "production" {
-  name = module.honestbee_production.cluster_id
+  name = module.eks_production.cluster_id
 }
 
 provider "kubernetes" {
@@ -45,7 +45,7 @@ provider "kubernetes" {
   version                = "~> 1.9"
 }
 
-module "honestbee_production" {
+module "eks_production" {
   source                = "terraform-aws-modules/eks/aws"
   version               = "~> 8.2.0"
   cluster_name          = local.cluster_name
@@ -55,7 +55,7 @@ module "honestbee_production" {
   write_kubeconfig = true
   map_accounts                         = [var.aws_account]
   cluster_endpoint_private_access      = true
-  cluster_endpoint_public_access       = true // terraform plan -target=module.honestbee_services.aws_eks_cluster.this -out plan
+  cluster_endpoint_public_access       = true // terraform plan -target=module.eks_services.aws_eks_cluster.this -out plan
   # cluster_endpoint_public_access_cidrs = local.whitelist_ips
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
   worker_groups = [

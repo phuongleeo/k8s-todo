@@ -1,0 +1,8 @@
+controller.ingressClass: nginx-public
+controller.name: public-controller
+controller.autoscaling.enabled: true
+controller.autoscaling.minReplicas: 1
+controller.autoscaling.maxReplicas: 2
+controller.autoscaling.targetCPUUtilizationPercentage: 90
+controller.autoscaling.targetMemoryUtilizationPercentage: 90
+controller.metrics.enabled: true

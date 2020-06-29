@@ -6,9 +6,10 @@ resource "aws_s3_bucket" "terraform_state" {
     enabled = true
   }
 
-  tags = "${merge(local.common_tags, map(
-    "Name", "${var.remote_state_bucket}"))
-  }"
+  tags = merge(local.common_tags,
+        map(
+          "Name", "${var.remote_state_bucket}"
+          ))
 
   server_side_encryption_configuration {
     rule {

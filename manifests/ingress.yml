@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: nginx-public
+  name: apps
+  namespace: kube-system
+spec:
+  rules:
+    - host: phuongleeo.tk
+      http:
+        paths:
+          - backend:
+              serviceName: kubernetes-dashboard
+              servicePort: 443
+            path: /
+  # This section is only required if TLS is to be enabled for the Ingress
+  # tls:
+  #     - hosts:
+  #         - www.example.com
+  #       secretName: example-tls
