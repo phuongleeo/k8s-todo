@@ -1,5 +1,5 @@
 resource "aws_s3_bucket" "terraform_state" {
-  bucket = "${var.remote_state_bucket}"
+  bucket = var.remote_state_bucket
   acl    = "private"
 
   versioning {
@@ -7,9 +7,9 @@ resource "aws_s3_bucket" "terraform_state" {
   }
 
   tags = merge(local.common_tags,
-        map(
-          "Name", "${var.remote_state_bucket}"
-          ))
+    map(
+      "Name", var.remote_state_bucket
+  ))
 
   server_side_encryption_configuration {
     rule {

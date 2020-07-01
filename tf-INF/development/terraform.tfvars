@@ -17,3 +17,5 @@ remote_state_bucket = "eu-central-1-default-eks-development-state"
 jumphost_sg = "sg-0bb665a0655dffab3"
 
 vpc_id = "vpc-0c0d7bf840b1d4527"
+
+project = "starburst"
