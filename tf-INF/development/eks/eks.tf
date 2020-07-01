@@ -1,6 +1,6 @@
 resource "aws_security_group" "worker_group_mgmt_one" {
   name_prefix = "worker_group_mgmt_one"
-  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+  vpc_id      = data.aws_vpc.development.id
 
   ingress {
     from_port = 22
@@ -8,14 +8,14 @@ resource "aws_security_group" "worker_group_mgmt_one" {
     protocol  = "tcp"
 
     cidr_blocks = [
-      "10.0.0.0/8",
+      var.cidr_v4,
     ]
   }
 }
 
 resource "aws_security_group" "all_worker_mgmt" {
   name_prefix = "all_worker_management"
-  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
+  vpc_id      = data.aws_vpc.development.id
 
   ingress {
     from_port = 22
@@ -23,9 +23,7 @@ resource "aws_security_group" "all_worker_mgmt" {
     protocol  = "tcp"
 
     cidr_blocks = [
-      "10.0.0.0/8",
-      "172.16.0.0/12",
-      "192.168.0.0/16",
+      var.cidr_v4
     ]
   }
 }
@@ -46,34 +44,45 @@ provider "kubernetes" {
 }
 
 module "eks_production" {
-  source                = "terraform-aws-modules/eks/aws"
-  version               = "~> 8.2.0"
-  cluster_name          = local.cluster_name
-  cluster_version       = "1.14"
-  subnets               = data.terraform_remote_state.vpc.outputs.subnet_private
-  vpc_id                = data.terraform_remote_state.vpc.outputs.vpc_id
-  write_kubeconfig = true
-  map_accounts                         = [var.aws_account]
-  cluster_endpoint_private_access      = true
-  cluster_endpoint_public_access       = true // terraform plan -target=module.eks_services.aws_eks_cluster.this -out plan
+  source                          = "terraform-aws-modules/eks/aws"
+  cluster_name                    = local.cluster_name
+  cluster_version                 = "1.16"
+  subnets                         = data.aws_subnet_ids.private.ids
+  vpc_id                          = data.aws_vpc.development.id
+  write_kubeconfig                = true
+  map_accounts                    = [var.aws_account]
+  cluster_endpoint_private_access = true
+  cluster_endpoint_public_access  = true // terraform plan -target=module.eks_services.aws_eks_cluster.this -out plan
   # cluster_endpoint_public_access_cidrs = local.whitelist_ips
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
   worker_groups = [
     {
-      ami_id = data.terraform_remote_state.ami.outputs.eks_optimized
-      instance_type                 = "m5a.4xlarge"
+      # ami_id                        = data.terraform_remote_state.ami.outputs.eks_optimized
+      instance_type                 = "m5a.large"
       asg_max_size                  = 2
       asg_desired_capacity          = 1
-      key_name                      = data.terraform_remote_state.key_pair.outputs.key_name
+      key_name                      = var.ssh_key_name
+      kubelet_extra_args            = "--node-labels=spot=false"
+      suspended_processes           = ["AZRebalance"]
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
 
       tags = concat(
         list(map(
-          "propagate_at_launch",true,
+          "propagate_at_launch", true,
           "key", "Group",
-          "value","${var.environment}"))
-        )
+        "value", "${var.environment}"))
+      )
     },
   ]
-  tags                                 = local.common_tags
+  worker_groups_launch_template = [
+    {
+      name                    = "spot-1"
+      override_instance_types = ["m5.large", "m5a.large"]
+      spot_instance_pools     = 2
+      asg_max_size            = 1
+      asg_desired_capacity    = 1
+      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
+    },
+  ]
+  tags = local.common_tags
 }

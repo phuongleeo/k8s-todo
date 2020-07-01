@@ -4,47 +4,12 @@ terraform {
   }
 }
 
-data "terraform_remote_state" "vpc" {
-  backend = "s3"
-
-  config = {
-    bucket = "${var.remote_state_bucket}"
-    key    = "stacks/vpc"
-    region = "${var.aws_region}"
-  }
-
-  workspace = "${terraform.workspace}"
+data "aws_vpc" "development" {
+  cidr_blocks = "10.51.0.0/21"
 }
-data "terraform_remote_state" "key_pair" {
-  backend = "s3"
-
-  config = {
-    bucket = "${var.remote_state_bucket}"
-    key    = "stacks/key-pair"
-    region = "${var.aws_region}"
+data "aws_subnet_ids" "private" {
+  vpc_id = data.aws_vpc.development.id
+  filter {
+    Name = "development-subnet-private"
   }
-
-  workspace = "${terraform.workspace}"
-}
-data "terraform_remote_state" "ami" {
-  backend = "s3"
-
-  config = {
-    bucket = "${var.remote_state_bucket}"
-    key    = "stacks/ami"
-    region = "${var.aws_region}"
-  }
-
-  workspace = "${terraform.workspace}"
-}
-data "terraform_remote_state" "secgroup" {
-  backend = "s3"
-
-  config = {
-    bucket = "${var.remote_state_bucket}"
-    key    = "stacks/sg"
-    region = "${var.aws_region}"
-  }
-
-  workspace = "${terraform.workspace}"
 }
