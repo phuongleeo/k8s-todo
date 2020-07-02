@@ -65,6 +65,7 @@ module "eks_production" {
       kubelet_extra_args            = "--node-labels=spot=false"
       suspended_processes           = ["AZRebalance"]
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
+      root_volume_size              = "20"
 
       tags = concat(
         list(map(
@@ -72,17 +73,18 @@ module "eks_production" {
           "key", "Group",
         "value", "${var.environment}"))
       )
-    },
+    }
   ]
-  worker_groups_launch_template = [
-    {
-      name                    = "spot-1"
-      override_instance_types = ["m5.large", "m5a.large"]
-      spot_instance_pools     = 2
-      asg_max_size            = 1
-      asg_desired_capacity    = 1
-      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
-    },
-  ]
+  # worker_groups_launch_template = [
+  #   {
+  #     name                    = "spot-1"
+  #     spot_price              = "0.2"
+  #     override_instance_types = ["m5.large", "m5a.large"]
+  #     root_volume_size        = "20"
+  #     asg_max_size            = 1
+  #     asg_desired_capacity    = 1
+  #     kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
+  #   },
+  # ]
   tags = local.common_tags
 }
