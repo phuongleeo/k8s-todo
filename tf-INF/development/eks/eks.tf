@@ -35,14 +35,6 @@ data "aws_eks_cluster_auth" "production" {
   name = module.eks_production.cluster_id
 }
 
-provider "kubernetes" {
-  host                   = data.aws_eks_cluster.production.endpoint
-  cluster_ca_certificate = base64decode(data.aws_eks_cluster.production.certificate_authority.0.data)
-  token                  = data.aws_eks_cluster_auth.production.token
-  load_config_file       = false
-  version                = "~> 1.9"
-}
-
 module "eks_production" {
   source                          = "terraform-aws-modules/eks/aws"
   cluster_name                    = local.cluster_name
@@ -75,16 +67,35 @@ module "eks_production" {
       )
     }
   ]
-  # worker_groups_launch_template = [
-  #   {
-  #     name                    = "spot-1"
-  #     spot_price              = "0.2"
-  #     override_instance_types = ["m5.large", "m5a.large"]
-  #     root_volume_size        = "20"
-  #     asg_max_size            = 1
-  #     asg_desired_capacity    = 1
-  #     kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
-  #   },
-  # ]
+  worker_groups_launch_template = [
+    {
+      name                    = "spot-1"
+      spot_price              = "0.2"
+      override_instance_types = ["m5.large", "m5a.large"]
+      root_volume_size        = "20"
+      asg_max_size            = 1
+      asg_desired_capacity    = 1
+      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
+    },
+  ]
   tags = local.common_tags
 }
+
+# resource "aws_subnet" "subnet_public" {
+#   for_each   = data.aws_subnet.cidr_public
+#   vpc_id     = data.aws_vpc.development.id
+#   cidr_block = each.value.cidr_block
+#   tags = {
+#     "kubernetes.io/role/elb"                      = 1
+#     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+#   }
+# }
+# resource "aws_subnet" "subnet_private" {
+#   for_each   = data.aws_subnet.cidr_private
+#   vpc_id     = data.aws_vpc.development.id
+#   cidr_block = each.value.cidr_block
+#   tags = {
+#     "kubernetes.io/role/internal-elb"             = 1
+#     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
+#   }
+# }

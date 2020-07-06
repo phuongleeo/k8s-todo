@@ -1,0 +1,3 @@
+locals {
+  namespace = ["bootstrap", "monitoring"]
+}
