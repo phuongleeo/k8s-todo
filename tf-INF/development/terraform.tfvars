@@ -2,8 +2,6 @@ aws_account = "073251215989"
 
 aws_region = "eu-central-1"
 
-squad = "ses"
-
 environment = "development"
 
 domain_env = "dev"
