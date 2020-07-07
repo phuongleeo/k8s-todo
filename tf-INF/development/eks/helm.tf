@@ -18,7 +18,7 @@ data "helm_repository" "stable" {
 
 resource "helm_release" "prometheus" {
   name       = "prometheus-operator"
-  repository = "stable"
+  repository = data.helm_repository.stable.metadata[0].name
   chart      = "prometheus-operator"
   version    = "8.15.11"
   namespace  = kubernetes_namespace.monitoring.metadata.0.name
