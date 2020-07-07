@@ -5,22 +5,65 @@ provider "helm" {
     token                  = data.aws_eks_cluster_auth.production.token
     load_config_file       = false
   }
-}
-data "helm_repository" "incubator" {
-  name = "incubator"
-  url  = "https://kubernetes-charts-incubator.storage.googleapis.com"
+  version = "~> 1.0"
 }
 
-data "helm_repository" "stable" {
-  name = "stable"
-  url  = "https://kubernetes-charts.storage.googleapis.com"
-}
-
+//prometheus-operator https://github.com/helm/charts/tree/master/stable/prometheus-operator
 resource "helm_release" "prometheus" {
   name       = "prometheus-operator"
-  repository = data.helm_repository.stable.metadata[0].name
+  repository = "https://kubernetes-charts.storage.googleapis.com"
   chart      = "prometheus-operator"
   version    = "8.15.11"
   namespace  = kubernetes_namespace.monitoring.metadata.0.name
   lint       = true
+}
+
+//https://github.com/aws/eks-charts/tree/master/stable/aws-node-termination-handler
+resource "helm_release" "node_termination_handler" {
+  name       = "aws-node-termination-handler"
+  repository = "https://aws.github.io/eks-charts"
+  chart      = "aws-node-termination-handler"
+  version    = "0.8.0"
+  namespace  = "kube-system"
+  lint       = true
+
+  set {
+    name  = "enablePrometheusServer"
+    value = "true"
+  }
+  set {
+    name  = "enableSpotInterruptionDraining"
+    value = "true"
+  }
+  set {
+    name  = "nodeSelector.node\\.kubernetes\\.io/lifecycle"
+    value = "spot"
+  }
+}
+
+//gohabor https://goharbor.io/docs/2.0.0/install-config/harbor-ha-helm/
+resource "helm_release" "gohabor" {
+  name       = "habor"
+  repository = lookup(local.char_repository, "habor")
+  chart      = "habor"
+  version    = "1.4.1"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+}
+
+resource "helm_release" "external_dns" {
+  name       = "external-dns"
+  repository = lookup(local.char_repository, "binami")
+  chart      = "external-dns"
+  version    = "3.2.3"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+  set {
+    name  = "provider"
+    value = "aws"
+  }
+  set {
+    name  = "aws.assumeRoleArn"
+    value = ""
+  }
 }
