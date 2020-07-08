@@ -11,7 +11,7 @@ provider "helm" {
 //prometheus-operator https://github.com/helm/charts/tree/master/stable/prometheus-operator
 resource "helm_release" "prometheus" {
   name       = "prometheus-operator"
-  repository = "https://kubernetes-charts.storage.googleapis.com"
+  repository = lookup(local.char_repository, "stable")
   chart      = "prometheus-operator"
   version    = "8.15.11"
   namespace  = kubernetes_namespace.monitoring.metadata.0.name
@@ -21,7 +21,7 @@ resource "helm_release" "prometheus" {
 //https://github.com/aws/eks-charts/tree/master/stable/aws-node-termination-handler
 resource "helm_release" "node_termination_handler" {
   name       = "aws-node-termination-handler"
-  repository = "https://aws.github.io/eks-charts"
+  repository = lookup(local.char_repository, "eks")
   chart      = "aws-node-termination-handler"
   version    = "0.8.0"
   namespace  = "kube-system"

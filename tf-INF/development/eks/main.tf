@@ -31,3 +31,15 @@ data "aws_subnet" "cidr_private" {
   for_each = data.aws_subnet_ids.private.ids
   id       = each.value
 }
+
+data "terraform_remote_state" "s3" {
+  backend = "s3"
+
+  config = {
+    bucket = "${var.remote_state_bucket}"
+    key    = "stacks/s3"
+    region = "${var.aws_region}"
+  }
+
+  workspace = "${terraform.workspace}"
+}
