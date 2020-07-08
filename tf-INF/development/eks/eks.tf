@@ -1,3 +1,6 @@
+data "template_file" "pod_restrict" {
+  template = file("userdata/pod_restrict.sh")
+}
 resource "aws_security_group" "worker_group_mgmt_one" {
   name_prefix = "worker_group_mgmt_one"
   vpc_id      = data.aws_vpc.development.id
@@ -47,36 +50,38 @@ module "eks_production" {
   cluster_endpoint_public_access  = true // terraform plan -target=module.eks_services.aws_eks_cluster.this -out plan
   # cluster_endpoint_public_access_cidrs = local.whitelist_ips
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
-  worker_groups = [
-    {
-      # ami_id                        = data.terraform_remote_state.ami.outputs.eks_optimized
-      instance_type                 = "m5a.large"
-      asg_max_size                  = 2
-      asg_desired_capacity          = 1
-      key_name                      = var.ssh_key_name
-      kubelet_extra_args            = "--node-labels=spot=false"
-      suspended_processes           = ["AZRebalance"]
-      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
-      root_volume_size              = "20"
 
-      tags = concat(
-        list(map(
-          "propagate_at_launch", true,
-          "key", "Group",
-        "value", "${var.environment}"))
-      )
-    }
+  worker_groups = [
+    # {
+    #   instance_type                 = "m5a.large"
+    #   asg_max_size                  = 2
+    #   asg_desired_capacity          = 1
+    #   key_name                      = var.ssh_key_name
+    #   kubelet_extra_args            = "--node-labels=spot=false"
+    #   suspended_processes           = ["AZRebalance"]
+    #   additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
+    #   root_volume_size              = "20"
+    #
+    #   tags = concat(
+    #     list(map(
+    #       "propagate_at_launch", true,
+    #       "key", "Group",
+    #     "value", "${var.environment}"))
+    #   )
+    # }
   ]
   worker_groups_launch_template = [
     {
       name                    = "spot-1"
       spot_price              = "0.2"
-      override_instance_types = ["m5.large", "m5a.large"]
+      override_instance_types = ["t3a.medium", "t3a.large"]
       root_volume_size        = "20"
-      asg_max_size            = 1
-      asg_desired_capacity    = 1
+      asg_max_size            = 2
+      asg_desired_capacity    = 2
       kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
-    },
+# pre_userdata                         = data.template_file.pod_restrict.rendered
+    }
+
   ]
   tags = local.common_tags
 }

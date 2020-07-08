@@ -1,3 +1,15 @@
+output "cluster_endpoint" {
+  value = module.eks_production.cluster_endpoint
+}
+
+output "cluster_ca" {
+  value = module.eks_production.cluster_certificate_authority_data
+}
+
+output "cluster_auth_token" {
+  value = data.aws_eks_cluster_auth.production.token
+}
+
 output "admin_sa" {
   value = "${kubernetes_service_account.admin.metadata}"
 }
