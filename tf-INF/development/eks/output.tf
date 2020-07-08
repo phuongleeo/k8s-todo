@@ -29,6 +29,6 @@ output "cluster_oidc_issuer_url" {
 output "charts_name" {
   value = list(helm_release.prometheus.chart,
     helm_release.node_termination_handler.chart,
-    helm_release.gohabor.chart,
+    helm_release.goharbor.chart,
   helm_release.external_dns.chart)
 }

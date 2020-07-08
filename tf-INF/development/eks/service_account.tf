@@ -27,7 +27,7 @@ data "aws_iam_policy_document" "habor_assume_role" {
 resource "aws_iam_role" "habor" {
   name               = "${var.environment}-s3-chart-habor"
   assume_role_policy = data.aws_iam_policy_document.habor_assume_role.json
-  tags               = "${local.common_tags}"
+  tags               = local.common_tags
 }
 
 resource "aws_iam_policy" "habor" {
@@ -36,6 +36,6 @@ resource "aws_iam_policy" "habor" {
 }
 
 resource "aws_iam_role_policy_attachment" "habor" {
-  role       = "${aws_iam_role.habor.name}"
-  policy_arn = "${aws_iam_policy.habor.arn}"
+  role       = aws_iam_role.habor.name
+  policy_arn = aws_iam_policy.habor.arn
 }
