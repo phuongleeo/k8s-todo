@@ -42,10 +42,10 @@ resource "helm_release" "node_termination_handler" {
 }
 
 //gohabor https://goharbor.io/docs/2.0.0/install-config/harbor-ha-helm/
-resource "helm_release" "gohabor" {
-  name       = "habor"
-  repository = lookup(local.char_repository, "habor")
-  chart      = "habor"
+resource "helm_release" "goharbor" {
+  name       = "harbor"
+  repository = lookup(local.char_repository, "harbor")
+  chart      = "harbor"
   version    = "1.4.1"
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
   lint       = true

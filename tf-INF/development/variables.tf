@@ -24,3 +24,4 @@ variable "ssh_key_name" {}
 variable "jumphost_sg" {}
 
 variable "vpc_id" {}
+variable "squad" {}
