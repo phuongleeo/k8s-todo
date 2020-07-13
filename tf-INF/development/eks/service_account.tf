@@ -1,9 +1,9 @@
+//harbor
 data "aws_iam_policy_document" "harbor" {
   statement {
     actions = [
       "s3:Get*",
       "s3:ListBucket",
-      "s3:GetharborConfiguration",
     ]
 
     resources = [
