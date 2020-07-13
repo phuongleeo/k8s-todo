@@ -43,3 +43,15 @@ data "terraform_remote_state" "s3" {
 
   workspace = "${terraform.workspace}"
 }
+
+data "terraform_remote_state" "route53" {
+  backend = "s3"
+
+  config = {
+    bucket = "${var.remote_state_bucket}"
+    key    = "stacks/route53"
+    region = "${var.aws_region}"
+  }
+
+  workspace = "${terraform.workspace}"
+}
