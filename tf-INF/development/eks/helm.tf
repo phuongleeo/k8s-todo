@@ -49,6 +49,43 @@ resource "helm_release" "goharbor" {
   version    = "1.4.1"
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
   lint       = true
+  set {
+    name  = "expose.ingress.hosts.core"
+    value = "harbor-core.${local.eks_domain}"
+  }
+  set {
+    name  = "expose.ingress.hosts.notary"
+    value = "harbor-notary.${local.eks_domain}"
+  }
+
+  set {
+    name  = "registry.credentials.username"
+    value = "harbor_registry_user"
+  }
+  set {
+    name  = "registry.credentials.password"
+    value = "harbor_registry_password"
+  }
+  set {
+    name  = "harborAdminPassword"
+    value = "Harbor12345"
+  }
+  set {
+    name  = "persistence.imageChartStorage.type"
+    value = "s3"
+  }
+  set {
+    name  = "persistence.imageChartStorage.s3.bucket"
+    value = data.terraform_remote_state.s3.outputs.chart_name
+  }
+  # set {
+  #   name  = "persistence.persistentVolumeClaim.registry.storageClass"
+  #   value = "s3"
+  # }
+  # set {
+  #   name  = "persistence.persistentVolumeClaim.chartmuseum.storageClass"
+  #   value = "s3"
+  # }
 }
 
 resource "helm_release" "external_dns" {
@@ -64,6 +101,32 @@ resource "helm_release" "external_dns" {
   }
   set {
     name  = "aws.assumeRoleArn"
-    value = ""
+    value = aws_iam_role.external_dns.arn
+  }
+  set {
+    name  = "domainFilters"
+    value = local.eks_domain
+  }
+  set {
+    name  = "zoneIdFilters"
+    value = data.terraform_remote_state.route53.outputs.eks_zone_id
+  }
+  set {
+    name  = "aws.zoneType"
+    value = "public"
+  }
+  set {
+    name  = "sources"
+    value = ["service", "ingress"]
+  }
+  //For ExternalDNS to be able to read Kubernetes and AWS token files
+  set {
+    name  = "podSecurityContext.fsGroup"
+    value = "65534"
+  }
+  //would prevent ExternalDNS from deleting any records, options: sync, upsert-only
+  set {
+    name  = "policy"
+    value = "upsert-only"
   }
 }
