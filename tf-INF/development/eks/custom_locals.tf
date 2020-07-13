@@ -4,9 +4,10 @@ locals {
 
 locals {
   char_repository = {
-    "stable" = "https://kubernetes-charts.storage.googleapis.com"
-    "eks"    = "https://aws.github.io/eks-charts"
-    "harbor" = "https://helm.goharbor.io"
-    "binami" = "https://charts.bitnami.com/bitnami"
+    "stable"   = "https://kubernetes-charts.storage.googleapis.com"
+    "eks"      = "https://aws.github.io/eks-charts"
+    "harbor"   = "https://helm.goharbor.io"
+    "binami"   = "https://charts.bitnami.com/bitnami"
+    "datawire" = "https://www.getambassador.io"
   }
 }
