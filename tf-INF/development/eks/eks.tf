@@ -79,7 +79,7 @@ module "eks_production" {
       asg_max_size            = 2
       asg_desired_capacity    = 2
       kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      additional_userdata            = data.template_file.pod_restrict.rendered
+      additional_userdata     = data.template_file.pod_restrict.rendered
     }
 
   ]

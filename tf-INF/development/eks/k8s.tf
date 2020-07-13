@@ -78,26 +78,26 @@ resource "kubernetes_cluster_role" "external_dns" {
 
   rule {
     api_groups = ["*"]
-    resources  = ["services","endpoints","pods"]
-    verbs      = ["get","watch","list"]
+    resources  = ["services", "endpoints", "pods"]
+    verbs      = ["get", "watch", "list"]
   }
   rule {
     api_groups = ["extensions"]
     resources  = ["ingresses"]
-    verbs      = ["get","watch","list"]
+    verbs      = ["get", "watch", "list"]
   }
   rule {
     api_groups = ["*"]
     resources  = ["nodes"]
-    verbs      = ["watch","list"]
+    verbs      = ["watch", "list"]
   }
 }
 
 resource "kubernetes_service_account" "external_dns" {
   metadata {
-    name      = "external-dns"
-    namespace = kubernetes_namespace.bootstrap.metadata.0.name
-    annotations = map("eks.amazonaws.com/role-arn",aws_iam_role.external_dns.arn)
+    name        = "external-dns"
+    namespace   = kubernetes_namespace.bootstrap.metadata.0.name
+    annotations = map("eks.amazonaws.com/role-arn", aws_iam_role.external_dns.arn)
   }
   secret {
     name = kubernetes_secret.external_dns.metadata.0.name
