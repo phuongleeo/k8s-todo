@@ -125,3 +125,59 @@ resource "kubernetes_role_binding" "external_dns" {
     namespace = "kube-system"
   }
 }
+
+//gohabor
+resource "kubernetes_cluster_role" "harbor" {
+  metadata {
+    name = "harbor-role"
+  }
+
+  rule {
+    api_groups = ["*"]
+    resources  = ["services", "endpoints", "pods"]
+    verbs      = ["get", "watch", "list"]
+  }
+  rule {
+    api_groups = ["extensions"]
+    resources  = ["ingresses"]
+    verbs      = ["get", "watch", "list"]
+  }
+  rule {
+    api_groups = ["*"]
+    resources  = ["nodes"]
+    verbs      = ["watch", "list"]
+  }
+}
+
+resource "kubernetes_service_account" "harbor" {
+  metadata {
+    name        = "harbor"
+    namespace   = kubernetes_namespace.bootstrap.metadata.0.name
+    annotations = map("eks.amazonaws.com/role-arn", aws_iam_role.harbor.arn)
+  }
+  secret {
+    name = kubernetes_secret.harbor.metadata.0.name
+  }
+}
+
+resource "kubernetes_secret" "harbor" {
+  metadata {
+    name = "harbor"
+  }
+}
+resource "kubernetes_role_binding" "harbor" {
+  metadata {
+    name      = "harbor"
+    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "ClusterRole"
+    name      = kubernetes_cluster_role.harbor.metadata.0.name
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_service_account.harbor.metadata.0.name
+    namespace = "kube-system"
+  }
+}
