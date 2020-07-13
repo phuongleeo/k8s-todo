@@ -1,8 +1,9 @@
 resource "aws_route53_zone" "eks" {
   name = local.eks_domain
-  tags = local.common_tags
+  tags = merge(local.common_tags,
+         "Kind","external-dns"
 }
-
+//add NS eks into parent zone
 resource "aws_route53_record" "ryte_tech" {
   depends_on      = ["aws_route53_zone.eks"]
   allow_overwrite = true
@@ -15,3 +16,4 @@ resource "aws_route53_record" "ryte_tech" {
     for i in aws_route53_zone.eks.name_servers : i
   ]
 }
+///end
