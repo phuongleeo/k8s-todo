@@ -1,5 +1,5 @@
 #!/bin/bash
-for i in config.tf locals.tf terraform.tfvars variables.tf versions.tf
+for i in config.tf locals.tf terraform.tfvars variables.tf versions.tf config_helm.tf
 do
  /bin/ln -sf ../$i .
 done
