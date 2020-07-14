@@ -49,7 +49,7 @@ resource "kubernetes_service_account" "cluster_admin" {
 
 resource "kubernetes_secret" "cluster_admin" {
   metadata {
-    name = "cluster_admin"
+    name = "cluster-admin"
   }
 }
 
