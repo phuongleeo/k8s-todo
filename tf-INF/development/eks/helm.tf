@@ -88,6 +88,14 @@ resource "helm_release" "goharbor" {
   # }
 }
 
+
+data "template_file" "external_dns" {
+  template = "${file("files/external-dns.yaml")}"
+  vars = {
+    eks_domain  = local.eks_domain
+    eks_zone_id = data.terraform_remote_state.route53.outputs.eks_zone_id
+  }
+}
 resource "helm_release" "external_dns" {
   name       = "external-dns"
   repository = lookup(local.char_repository, "binami")
@@ -95,29 +103,33 @@ resource "helm_release" "external_dns" {
   version    = "3.2.3"
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
   lint       = true
+
+  values = [
+    # data.template_file.external_dns.rendered
+    templatefile("files/external-dns.yaml", {
+      eks_domain  = local.eks_domain,
+      eks_zone_id = data.terraform_remote_state.route53.outputs.eks_zone_id
+    })
+  ]
   set {
     name  = "provider"
     value = "aws"
   }
-  set {
-    name  = "aws.assumeRoleArn"
-    value = aws_iam_role.external_dns.arn
-  }
-  set {
-    name  = "domainFilters"
-    value = local.eks_domain
-  }
-  set {
-    name  = "zoneIdFilters"
-    value = data.terraform_remote_state.route53.outputs.eks_zone_id
-  }
+  # set {
+  #   name  = "aws.assumeRoleArn"
+  #   value = aws_iam_role.external_dns.arn
+  # }
+  # set {
+  #   name  = "domainFilters"
+  #   value = local.eks_domain
+  # }
+  # set {
+  #   name  = "zoneIdFilters"
+  #   value = data.terraform_remote_state.route53.outputs.eks_zone_id
+  # }
   set {
     name  = "aws.zoneType"
     value = "public"
-  }
-  set {
-    name  = "sources"
-    value = ["service", "ingress"]
   }
   //For ExternalDNS to be able to read Kubernetes and AWS token files
   set {
