@@ -31,4 +31,7 @@ get:
 destroy:
 	$(TERRAFORM) destroy
 
+symlink:
+	../../helpers/import_symlink.sh
+	
 .PHONY: plan apply

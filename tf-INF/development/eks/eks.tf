@@ -30,15 +30,15 @@ resource "aws_security_group" "all_worker_mgmt" {
     ]
   }
 }
-data "aws_eks_cluster" "production" {
-  name = module.eks_production.cluster_id
+data "aws_eks_cluster" "eks" {
+  name = module.eks.cluster_id
 }
 
-data "aws_eks_cluster_auth" "production" {
-  name = module.eks_production.cluster_id
+data "aws_eks_cluster_auth" "eks" {
+  name = module.eks.cluster_id
 }
 
-module "eks_production" {
+module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
   cluster_name                    = local.cluster_name
   cluster_version                 = "1.16"
