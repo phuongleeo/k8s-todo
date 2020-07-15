@@ -25,50 +25,50 @@ resource "kubernetes_namespace" "monitoring" {
   }
 }
 //Admin cluster
-resource "kubernetes_cluster_role" "cluster_admin" {
-  metadata {
-    name = "cluster-admin"
-  }
+# resource "kubernetes_cluster_role" "cluster_admin" {
+#   metadata {
+#     name = "cluster-admin"
+#   }
 
-  rule {
-    api_groups = ["*"]
-    resources  = ["*"]
-    verbs      = ["*"]
-  }
-}
+#   rule {
+#     api_groups = ["*"]
+#     resources  = ["*"]
+#     verbs      = ["*"]
+#   }
+# }
 
-resource "kubernetes_service_account" "cluster_admin" {
-  metadata {
-    name      = "cluster-admin"
-    namespace = "kube-system"
-  }
-  secret {
-    name = kubernetes_secret.cluster_admin.metadata.0.name
-  }
-}
+# resource "kubernetes_service_account" "cluster_admin" {
+#   metadata {
+#     name      = "cluster-admin"
+#     namespace = "kube-system"
+#   }
+#   secret {
+#     name = kubernetes_secret.cluster_admin.metadata.0.name
+#   }
+# }
 
-resource "kubernetes_secret" "cluster_admin" {
-  metadata {
-    name = "cluster-admin"
-  }
-}
+# resource "kubernetes_secret" "cluster_admin" {
+#   metadata {
+#     name = "cluster-admin"
+#   }
+# }
 
-resource "kubernetes_role_binding" "admin" {
-  metadata {
-    name      = "cluster-admin"
-    namespace = "kube-system"
-  }
-  role_ref {
-    api_group = "rbac.authorization.k8s.io"
-    kind      = "ClusterRole"
-    name      = kubernetes_cluster_role.cluster_admin.metadata.0.name
-  }
-  subject {
-    kind      = "ServiceAccount"
-    name      = kubernetes_service_account.cluster_admin.metadata.0.name
-    namespace = "kube-system"
-  }
-}
+# resource "kubernetes_role_binding" "admin" {
+#   metadata {
+#     name      = kubernetes_service_account.cluster_admin.metadata.0.name
+#     namespace = "kube-system"
+#   }
+#   role_ref {
+#     api_group = "rbac.authorization.k8s.io"
+#     kind      = "ClusterRole"
+#     name      = kubernetes_cluster_role.cluster_admin.metadata.0.name
+#   }
+#   subject {
+#     kind      = "ServiceAccount"
+#     name      = kubernetes_service_account.cluster_admin.metadata.0.name
+#     namespace = "kube-system"
+#   }
+# }
 
 //external dns
 resource "kubernetes_cluster_role" "external_dns" {
@@ -95,9 +95,11 @@ resource "kubernetes_cluster_role" "external_dns" {
 
 resource "kubernetes_service_account" "external_dns" {
   metadata {
-    name        = "external-dns"
-    namespace   = kubernetes_namespace.bootstrap.metadata.0.name
-    annotations = map("eks.amazonaws.com/role-arn", aws_iam_role.external_dns.arn)
+    name      = "external-dns"
+    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.external_dns.arn
+    }
   }
   secret {
     name = kubernetes_secret.external_dns.metadata.0.name
@@ -151,9 +153,11 @@ resource "kubernetes_cluster_role" "harbor" {
 
 resource "kubernetes_service_account" "harbor" {
   metadata {
-    name        = "harbor"
-    namespace   = kubernetes_namespace.bootstrap.metadata.0.name
-    annotations = map("eks.amazonaws.com/role-arn", aws_iam_role.harbor.arn)
+    name      = "harbor"
+    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+    annotations = {
+      "eks.amazonaws.com/role-arn" = aws_iam_role.harbor.arn
+    }
   }
   secret {
     name = kubernetes_secret.harbor.metadata.0.name

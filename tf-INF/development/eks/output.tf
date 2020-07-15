@@ -10,9 +10,9 @@ output "cluster_auth_token" {
   value = data.aws_eks_cluster_auth.eks.token
 }
 
-output "admin_sa" {
-  value = "${kubernetes_service_account.cluster_admin.metadata}"
-}
+# output "admin_sa" {
+#   value = "${kubernetes_service_account.cluster_admin.metadata}"
+# }
 
 output "auth_cm" {
   value = "${module.eks.config_map_aws_auth}"
