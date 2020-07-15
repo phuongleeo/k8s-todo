@@ -41,7 +41,7 @@ data "aws_eks_cluster_auth" "eks" {
 module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
   cluster_name                    = local.cluster_name
-  cluster_version                 = "1.16"
+  cluster_version                 = "1.17"
   subnets                         = data.aws_subnet_ids.private.ids
   vpc_id                          = data.aws_vpc.development.id
   write_kubeconfig                = true
