@@ -49,7 +49,7 @@ data "aws_iam_policy_document" "external_dns" {
     ]
 
     resources = [
-      data.terraform_remote_state.route53.outputs.eks_zone_id
+      "arn:aws:route53:::hostedzone/${data.terraform_remote_state.route53.outputs.eks_zone_id}"
     ]
   }
   statement {

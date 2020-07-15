@@ -89,13 +89,13 @@ resource "helm_release" "goharbor" {
 }
 
 
-data "template_file" "external_dns" {
-  template = "${file("files/external-dns.yaml")}"
-  vars = {
-    eks_domain  = local.eks_domain
-    eks_zone_id = data.terraform_remote_state.route53.outputs.eks_zone_id
-  }
-}
+# data "template_file" "external_dns" {
+#   template = "${file("files/external-dns.yaml")}"
+#   vars = {
+#     eks_domain  = local.eks_domain
+#     eks_zone_id = data.terraform_remote_state.route53.outputs.eks_zone_id
+#   }
+# }
 resource "helm_release" "external_dns" {
   name       = "external-dns"
   repository = lookup(local.char_repository, "binami")
@@ -107,8 +107,9 @@ resource "helm_release" "external_dns" {
   values = [
     # data.template_file.external_dns.rendered
     templatefile("files/external-dns.yaml", {
-      eks_domain  = local.eks_domain,
-      eks_zone_id = data.terraform_remote_state.route53.outputs.eks_zone_id
+      eks_domain        = local.eks_domain,
+      eks_zone_id       = data.terraform_remote_state.route53.outputs.eks_zone_id,
+      external_dns_role = aws_iam_role.external_dns.arn
     })
   ]
   set {
@@ -118,14 +119,6 @@ resource "helm_release" "external_dns" {
   # set {
   #   name  = "aws.assumeRoleArn"
   #   value = aws_iam_role.external_dns.arn
-  # }
-  # set {
-  #   name  = "domainFilters"
-  #   value = local.eks_domain
-  # }
-  # set {
-  #   name  = "zoneIdFilters"
-  #   value = data.terraform_remote_state.route53.outputs.eks_zone_id
   # }
   set {
     name  = "aws.zoneType"
@@ -137,6 +130,18 @@ resource "helm_release" "external_dns" {
     value = "65534"
   }
   //would prevent ExternalDNS from deleting any records, options: sync, upsert-only
+  set {
+    name  = "policy"
+    value = "upsert-only"
+  }
+  set {
+    name  = "serviceAccount.create"
+    value = "false"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = kubernetes_service_account.external_dns.metadata.0.name
+  }
   set {
     name  = "policy"
     value = "upsert-only"
