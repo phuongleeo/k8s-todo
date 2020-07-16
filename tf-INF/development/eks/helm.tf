@@ -110,54 +110,104 @@ resource "helm_release" "goharbor" {
 }
 
 
-# resource "helm_release" "external_dns" {
-#   name       = "external-dns"
-#   repository = lookup(local.char_repository, "bitnami")
-#   chart      = "external-dns"
-#   version    = "3.2.3"
-#   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
-#   lint       = true
+resource "helm_release" "external_dns" {
+  name       = "external-dns"
+  repository = lookup(local.char_repository, "bitnami")
+  chart      = "external-dns"
+  version    = "3.2.3"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
 
-#   values = [
-#     # data.template_file.external_dns.rendered
-#     templatefile("files/external-dns.yaml", {
-#       eks_domain        = local.eks_domain,
-#       eks_zone_id       = data.terraform_remote_state.route53.outputs.eks_zone_id,
-#       external_dns_role = aws_iam_role.external_dns.arn
-#     })
-#   ]
-#   set {
-#     name  = "provider"
-#     value = "aws"
-#   }
-#   # set {
-#   #   name  = "aws.assumeRoleArn"
-#   #   value = aws_iam_role.external_dns.arn
-#   # }
-#   set {
-#     name  = "aws.zoneType"
-#     value = "public"
-#   }
-#   //For ExternalDNS to be able to read Kubernetes and AWS token files
-#   set {
-#     name  = "podSecurityContext.fsGroup"
-#     value = "65534"
-#   }
-#   //would prevent ExternalDNS from deleting any records, options: sync, upsert-only
-#   set {
-#     name  = "policy"
-#     value = "upsert-only"
-#   }
-#   set {
-#     name  = "serviceAccount.create"
-#     value = "false"
-#   }
-#   set {
-#     name  = "serviceAccount.name"
-#     value = kubernetes_service_account.external_dns.metadata.0.name
-#   }
-#   set {
-#     name  = "policy"
-#     value = "upsert-only"
-#   }
-# }
+  values = [
+    # data.template_file.external_dns.rendered
+    templatefile("files/external-dns.yaml", {
+      eks_domain        = local.eks_domain,
+      eks_zone_id       = data.terraform_remote_state.route53.outputs.eks_zone_id,
+      external_dns_role = aws_iam_role.external_dns.arn
+    })
+  ]
+  set {
+    name  = "provider"
+    value = "aws"
+  }
+  set {
+    name  = "aws.assumeRoleArn"
+    value = aws_iam_role.external_dns.arn
+  }
+  set {
+    name  = "aws.zoneType"
+    value = "public"
+  }
+  //For ExternalDNS to be able to read Kubernetes and AWS token files
+  set {
+    name  = "podSecurityContext.fsGroup"
+    value = "65534"
+  }
+  //would prevent ExternalDNS from deleting any records, options: sync, upsert-only
+  set {
+    name  = "policy"
+    value = "upsert-only"
+  }
+  set {
+    name  = "serviceAccount.create"
+    value = "false"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = kubernetes_service_account.external_dns.metadata.0.name
+  }
+  set {
+    name  = "policy"
+    value = "upsert-only"
+  }
+}
+
+//Argo CI/CD
+resource "helm_release" "argo_workflows" {
+  name       = "argo-workflows"
+  repository = lookup(local.char_repository, "argocd")
+  chart      = "argo"
+  version    = "0.9.8"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+
+  values = [
+    # data.template_file.external_dns.rendered
+    yamlencode({ "controller" : { "workflowNamespaces" : [
+      kubernetes_namespace.bootstrap.metadata.0.name,
+      kubernetes_namespace.monitoring.metadata.0.name,
+    "api"] } })
+  ]
+}
+resource "helm_release" "argo-cd" {
+  name       = "argo-cd"
+  repository = lookup(local.char_repository, "argocd")
+  chart      = "argo-cd"
+  version    = "2.5.4"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+}
+resource "helm_release" "argo_events" {
+  name       = "argo-events"
+  repository = lookup(local.char_repository, "argocd")
+  chart      = "argo-events"
+  version    = "0.14.0"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+}
+resource "helm_release" "argo_rollouts" {
+  name       = "argo-rollouts"
+  repository = lookup(local.char_repository, "argocd")
+  chart      = "argo-rollouts"
+  version    = "0.14.0"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+}
+resource "helm_release" "argocd_notifications" {
+  name       = "argocd-notifications"
+  repository = lookup(local.char_repository, "argocd")
+  chart      = "argocd-notifications"
+  version    = "1.0.7"
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+}
