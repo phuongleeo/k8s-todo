@@ -76,8 +76,8 @@ module "eks" {
       spot_price              = "0.2"
       override_instance_types = ["t3a.medium", "t3a.large"]
       root_volume_size        = "20"
-      asg_max_size            = 2
-      asg_desired_capacity    = 2
+      asg_max_size            = 3
+      asg_desired_capacity    = 3
       kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
       additional_userdata     = data.template_file.pod_restrict.rendered
     }
