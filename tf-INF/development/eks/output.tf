@@ -9,7 +9,9 @@ output "cluster_ca" {
 output "cluster_auth_token" {
   value = data.aws_eks_cluster_auth.eks.token
 }
-
+output "kubeconfig_filename" {
+  value = module.eks.kubeconfig_filename
+}
 # output "admin_sa" {
 #   value = "${kubernetes_service_account.cluster_admin.metadata}"
 # }
