@@ -86,6 +86,24 @@ module "eks" {
   tags = local.common_tags
 }
 
+resource null_resource "install_istio" {
+  depends_on = [
+    module.eks
+  ]
+
+  triggers = {
+    cluster_endpoint = module.eks.cluster_endpoint
+  }
+
+  provisioner "local-exec" {
+    command     = "files/install-istio.sh"
+    interpreter = ["/bin/bash"]
+    environment = {
+      # KUBECONFIG = "pathexpand("${path.root}${module.eks.kubeconfig_filename}")"
+      KUBECONFIG = "/Users/phuongleeo/Documents/NFQ/github-nfq/devops/k8s-todo/tf-INF/development/eks/kubeconfig_starburst-dev"
+    }
+  }
+}
 # resource "aws_subnet" "subnet_public" {
 #   for_each   = data.aws_subnet.cidr_public
 #   vpc_id     = data.aws_vpc.development.id
