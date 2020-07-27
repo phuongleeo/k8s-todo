@@ -27,7 +27,10 @@ resource "kubernetes_namespace" "monitoring" {
 //Admin cluster
 resource "kubernetes_cluster_role" "cluster_admin" {
   metadata {
-    name = "cluster-admin"
+    name = "cluster-admin-tf"
+    annotations = {
+      "rbac.authorization.kubernetes.io/autoupdate" = true
+    }
   }
 
   rule {
@@ -39,8 +42,8 @@ resource "kubernetes_cluster_role" "cluster_admin" {
 
 resource "kubernetes_service_account" "cluster_admin" {
   metadata {
-    name      = "cluster-admin"
-    namespace = "kube-system"
+    name = "cluster-admin-tf"
+    # namespace = "kube-system"
   }
   secret {
     name = kubernetes_secret.cluster_admin.metadata.0.name
@@ -49,14 +52,13 @@ resource "kubernetes_service_account" "cluster_admin" {
 
 resource "kubernetes_secret" "cluster_admin" {
   metadata {
-    name = "cluster-admin"
+    name = "cluster-admin-tf"
   }
 }
 
-resource "kubernetes_role_binding" "admin" {
+resource "kubernetes_cluster_role_binding" "admin" {
   metadata {
-    name      = kubernetes_service_account.cluster_admin.metadata.0.name
-    namespace = "kube-system"
+    name = kubernetes_service_account.cluster_admin.metadata.0.name
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -66,7 +68,7 @@ resource "kubernetes_role_binding" "admin" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.cluster_admin.metadata.0.name
-    namespace = "kube-system"
+    namespace = " "
   }
 }
 
@@ -74,6 +76,9 @@ resource "kubernetes_role_binding" "admin" {
 resource "kubernetes_cluster_role" "external_dns" {
   metadata {
     name = "external-dns-role"
+    annotations = {
+      "rbac.authorization.kubernetes.io/autoupdate" = true
+    }
   }
 
   rule {
@@ -95,8 +100,8 @@ resource "kubernetes_cluster_role" "external_dns" {
 
 resource "kubernetes_service_account" "external_dns" {
   metadata {
-    name      = "external-dns"
-    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+    name = "external-dns"
+    # namespace = kubernetes_namespace.bootstrap.metadata.0.name
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.external_dns.arn
     }
@@ -111,10 +116,10 @@ resource "kubernetes_secret" "external_dns" {
     name = "external-dns"
   }
 }
-resource "kubernetes_role_binding" "external_dns" {
+resource "kubernetes_cluster_role_binding" "external_dns" {
   metadata {
-    name      = "external-dns"
-    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+    name = "external-dns"
+    # namespace = kubernetes_namespace.bootstrap.metadata.0.name
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -124,7 +129,7 @@ resource "kubernetes_role_binding" "external_dns" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.external_dns.metadata.0.name
-    namespace = "kube-system"
+    namespace = " "
   }
 }
 
@@ -132,6 +137,9 @@ resource "kubernetes_role_binding" "external_dns" {
 resource "kubernetes_cluster_role" "harbor" {
   metadata {
     name = "harbor-role"
+    annotations = {
+      "rbac.authorization.kubernetes.io/autoupdate" = true
+    }
   }
 
   rule {
@@ -153,8 +161,8 @@ resource "kubernetes_cluster_role" "harbor" {
 
 resource "kubernetes_service_account" "harbor" {
   metadata {
-    name      = "harbor"
-    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+    name = "harbor"
+    # namespace = kubernetes_namespace.bootstrap.metadata.0.name
     annotations = {
       "eks.amazonaws.com/role-arn" = aws_iam_role.harbor.arn
     }
@@ -169,10 +177,10 @@ resource "kubernetes_secret" "harbor" {
     name = "harbor"
   }
 }
-resource "kubernetes_role_binding" "harbor" {
+resource "kubernetes_cluster_role_binding" "harbor" {
   metadata {
-    name      = "harbor"
-    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+    name = "harbor"
+    # namespace = kubernetes_namespace.bootstrap.metadata.0.name
   }
   role_ref {
     api_group = "rbac.authorization.k8s.io"
@@ -182,6 +190,6 @@ resource "kubernetes_role_binding" "harbor" {
   subject {
     kind      = "ServiceAccount"
     name      = kubernetes_service_account.harbor.metadata.0.name
-    namespace = "kube-system"
+    namespace = " "
   }
 }

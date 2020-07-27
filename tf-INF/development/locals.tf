@@ -14,6 +14,6 @@ locals {
 }
 
 locals {
-  cluster_name = "${var.project}-${var.domain_env}"
+  cluster_name             = "${var.project}-${var.domain_env}"
+  cas_service_account_name = "cluster-autoscaler-aws-cluster-autoscaler"
 }
-

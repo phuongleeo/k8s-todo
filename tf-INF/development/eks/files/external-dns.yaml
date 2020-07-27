@@ -2,6 +2,7 @@ domainFilters:
  - ${eks_domain}
 zoneIdFilters:
  - ${eks_zone_id}
+
 serviceAccount:
- annotations:
-  - eks.amazonaws.com/role-arn: ${external_dns_role}
+  annotations:
+    - eks.amazonaws.com/role-arn: ${external_dns_role}
