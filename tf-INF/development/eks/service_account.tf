@@ -4,6 +4,8 @@ data "aws_iam_policy_document" "harbor" {
     actions = [
       "s3:Get*",
       "s3:ListBucket",
+      "s3:PutObject",
+      "s3:DeleteObject",
     ]
 
     resources = [
@@ -24,22 +26,21 @@ data "aws_iam_policy_document" "harbor_assume_role" {
     actions = ["sts:AssumeRole"]
   }
 }
-resource "aws_iam_role" "harbor" {
-  name               = "${var.environment}-s3-chart-harbor"
-  assume_role_policy = data.aws_iam_policy_document.harbor_assume_role.json
-  tags               = local.common_tags
-}
 
 resource "aws_iam_policy" "harbor" {
   name   = "${var.environment}-s3-chart-harbor"
   policy = data.aws_iam_policy_document.harbor.json
 }
 
-resource "aws_iam_role_policy_attachment" "harbor" {
-  role       = aws_iam_role.harbor.name
-  policy_arn = aws_iam_policy.harbor.arn
+module "harbor_role" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "~> v2.12.0"
+  create_role                   = true
+  role_name                     = "harbor"
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.harbor.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${kubernetes_namespace.bootstrap.metadata.0.name}:${local.harbor_sa_name}"]
 }
-
 /////////////
 //external_dns
 data "aws_iam_policy_document" "external_dns" {
@@ -76,20 +77,20 @@ data "aws_iam_policy_document" "external_dns_assume_role" {
     actions = ["sts:AssumeRole"]
   }
 }
-resource "aws_iam_role" "external_dns" {
-  name               = "${var.environment}-external_dns"
-  assume_role_policy = data.aws_iam_policy_document.external_dns_assume_role.json
-  tags               = local.common_tags
-}
 
 resource "aws_iam_policy" "external_dns" {
   name   = "${var.environment}-external_dns"
   policy = data.aws_iam_policy_document.external_dns.json
 }
 
-resource "aws_iam_role_policy_attachment" "external_dns" {
-  role       = aws_iam_role.external_dns.name
-  policy_arn = aws_iam_policy.external_dns.arn
+module "external_dns_role" {
+  source                        = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version                       = "~> v2.12.0"
+  create_role                   = true
+  role_name                     = "external-dns"
+  provider_url                  = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns              = [aws_iam_policy.external_dns.arn]
+  oidc_fully_qualified_subjects = ["system:serviceaccount:${kubernetes_namespace.bootstrap.metadata.0.name}:${local.external_dns_sa_name}"]
 }
 
 //cluster-autoscaler

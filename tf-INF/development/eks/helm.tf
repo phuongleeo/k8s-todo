@@ -72,6 +72,7 @@ resource "helm_release" "cluster_autoscaler" {
     name  = "awsRegion"
     value = var.aws_region
   }
+
   set {
     name  = "rbac.serviceAccountAnnotations.eks\\.amazonaws\\.com/role-arn"
     value = module.cluster_autoscaler.this_iam_role_arn
@@ -87,74 +88,95 @@ resource "helm_release" "cluster_autoscaler" {
 }
 //gohabor https://goharbor.io/docs/2.0.0/install-config/harbor-ha-helm/
 
-# resource "helm_release" "goharbor" {
-#   depends_on = [
-#     module.eks,
-#     null_resource.install_istio
-#   ]
-#   name       = "harbor"
-#   repository = lookup(local.char_repository, "harbor")
-#   chart      = "harbor"
-#   version    = "1.4.1" //harbor chart version: 1.4.1 , bitnami: 6.0.10
-#   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
-#   lint       = true
-#   set {
-#     name  = "expose.ingress.hosts.core" // key goharbor chart
-#     value = "https://habor.${local.eks_domain}"
-#     # name  = "ingress.hosts.core" // bitnami key
-#     # value = "harbor-core.${local.eks_domain}"
-#   }
-#   set {
-#     name = "expose.ingress.hosts.notary"
-#     # name  = "ingress.hosts.notary"
-#     value = "https://harbor-notary.${local.eks_domain}"
-#   }
-#
-#   set {
-#     name  = "registry.credentials.username"
-#     value = "harbor_registry_user"
-#   }
-#   set {
-#     name  = "registry.credentials.password"
-#     value = "harbor_registry_password"
-#   }
-#   set {
-#     name  = "harborAdminPassword"
-#     value = "admin"
-#   }
-#   set {
-#     name  = "persistence.imageChartStorage.type"
-#     value = "s3"
-#   }
-#   set {
-#     name  = "persistence.imageChartStorage.s3.bucket"
-#     value = data.terraform_remote_state.s3.outputs.chart_name
-#   }
-#   set {
-#     name  = "persistence.imageChartStorage.s3.region"
-#     value = var.aws_region
-#   }
-#
-#   set {
-#     name  = "expose.type"
-#     value = "NodePort"
-#   }
-#   set {
-#     name  = "externalURL"
-#     value = "https://habor.${local.eks_domain}"
-#   }
-#
-#   # set {
-#   #   name  = "persistence.persistentVolumeClaim.registry.storageClass"
-#   #   value = "s3"
-#   # }
-#   # set {
-#   #   name  = "persistence.persistentVolumeClaim.chartmuseum.storageClass"
-#   #   value = "s3"
-#   # }
-# }
-#
-#
+resource "helm_release" "goharbor" {
+  depends_on = [
+    module.eks,
+    null_resource.install_istio
+  ]
+  name       = "harbor"
+  repository = lookup(local.char_repository, "harbor")
+  chart      = "harbor"
+  version    = "1.4.1" //harbor chart version: 1.4.1 , bitnami: 6.0.10
+  namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+  lint       = true
+  set {
+    name  = "expose.ingress.hosts.core" // key goharbor chart
+    value = "harbor.${local.eks_domain}"
+    # name  = "ingress.hosts.core" // bitnami key
+    # value = "harbor-core.${local.eks_domain}"
+  }
+  set {
+    name = "expose.ingress.hosts.notary"
+    # name  = "ingress.hosts.notary"
+    value = "notary.${local.eks_domain}"
+  }
+
+  set {
+    name  = "registry.credentials.username"
+    value = "harbor_registry_user"
+  }
+  set {
+    name  = "registry.credentials.password"
+    value = "harbor_registry_password"
+  }
+  set {
+    name  = "harborAdminPassword"
+    value = "admin"
+  }
+  set {
+    name  = "persistence.imageChartStorage.type"
+    value = "filesystem"
+  }
+  set {
+    name  = "persistence.resourcePolicy"
+    value = "delete"
+  }
+  set {
+    name  = "persistence.persistentVolumeClaim.registry.size"
+    value = "1Gi"
+  }
+  set {
+    name  = "persistence.persistentVolumeClaim.chartmuseum.size"
+    value = "1Gi"
+  }
+  # set {
+  #   name  = "persistence.imageChartStorage.s3.bucket"
+  #   value = data.terraform_remote_state.s3.outputs.chart_name
+  # }
+  # set {
+  #   name  = "persistence.imageChartStorage.s3.region"
+  #   value = var.aws_region
+  # }
+
+  set {
+    name  = "expose.type"
+    value = "ingress"
+  }
+  set {
+    name  = "expose.ingress.annotations.kubernetes\\.io/ingress\\.class"
+    value = "istio"
+  }
+  set {
+    name  = "expose.ingress.annotations.external-dns/enable"
+    value = "\"true\""
+  }
+
+  set {
+    name  = "externalURL"
+    value = "https://harbor.${local.eks_domain}"
+  }
+
+  # set {
+  #   name  = "persistence.persistentVolumeClaim.registry.storageClass"
+  #   value = "s3"
+  # }
+  # set {
+  #   name  = "persistence.persistentVolumeClaim.chartmuseum.storageClass"
+  #   value = "s3"
+  # }
+}
+
+
 resource "helm_release" "external_dns" {
   depends_on = [
     module.eks,
@@ -163,7 +185,7 @@ resource "helm_release" "external_dns" {
   name       = "external-dns"
   repository = lookup(local.char_repository, "bitnami")
   chart      = "external-dns"
-  version    = "3.2.3"
+  version    = "3.2.4"
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
   lint       = true
 
@@ -200,12 +222,16 @@ resource "helm_release" "external_dns" {
     value = "{${data.terraform_remote_state.route53.outputs.eks_zone_id}}"
   }
   set {
-    name  = "rbac.serviceAccountAnnotations.eks\\.amazonaws\\.com/role-arn"
-    value = aws_iam_role.external_dns.arn
+    name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
+    value = module.external_dns_role.this_iam_role_arn
   }
   set {
-    name  = "rbac.serviceAccountName"
-    value = kubernetes_service_account.external_dns.metadata.0.name
+    name  = "serviceAccount.name"
+    value = "external-dns"
+  }
+  set {
+    name  = "rbac.create"
+    value = true
   }
 
   //For ExternalDNS to be able to read Kubernetes and AWS token files
