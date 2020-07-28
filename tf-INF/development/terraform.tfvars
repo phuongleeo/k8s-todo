@@ -17,4 +17,5 @@ jumphost_sg = "sg-0bb665a0655dffab3"
 vpc_id = "vpc-0c0d7bf840b1d4527"
 
 project = "starburst"
-squad   = "ses"
+
+squad = "ses"

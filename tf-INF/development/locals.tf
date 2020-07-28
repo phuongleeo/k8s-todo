@@ -16,4 +16,6 @@ locals {
 locals {
   cluster_name             = "${var.project}-${var.domain_env}"
   cas_service_account_name = "cluster-autoscaler-aws-cluster-autoscaler"
+  external_dns_sa_name     = "external-dns"
+  harbor_sa_name           = "harbor"
 }
