@@ -99,6 +99,7 @@ resource "helm_release" "goharbor" {
   version    = "1.4.1" //harbor chart version: 1.4.1 , bitnami: 6.0.10
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
   lint       = true
+  wait       = false
   set {
     name  = "expose.ingress.hosts.core" // key goharbor chart
     value = "harbor.${local.eks_domain}"
