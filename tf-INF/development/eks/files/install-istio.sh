@@ -15,8 +15,12 @@ cp /tmp/istio-$ISTIO_VERSION/bin/istioctl $INSTALL_DIR/istioctl
 chmod +x $INSTALL_DIR/istioctl
 echo "Init Operator"
 $INSTALL_DIR/istioctl operator init
+echo "Generate istio manifest prior to install"
+$INSTALL_DIR/istioctl manifest generate --set profile=demo \
+--set addonComponents.grafana.enabled=true \
+-f $ISTIO_OVERWRITE > files/generated-manifest.yaml
 echo "istioctl install demo"
 $INSTALL_DIR/istioctl install --set profile=demo --set addonComponents.grafana.enabled=true --skip-confirmation \
 -f $ISTIO_OVERWRITE
 echo "istioctl verify-install"
-$INSTALL_DIR/istioctl verify-install
+$INSTALL_DIR/istioctl verify-install -f files/generated-manifest.yaml

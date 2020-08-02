@@ -108,7 +108,7 @@ resource "null_resource" "install_istio" {
       KUBECONFIG      = pathexpand("${path.cwd}/kubeconfig_${local.cluster_name}")
       BINARY_DIR      = pathexpand("${path.cwd}/files/istio-1.6.5")
       ISTIO_VERSION   = "1.6.5"
-      ISTIO_OVERWRITE = pathexpand("${path.cwd}/files/istio-overwrite.yaml")
+      ISTIO_OVERWRITE = pathexpand("${path.cwd}/files/istio-operator.yaml")
       CERT_ARN        = data.terraform_remote_state.setup.outputs.cert_arn
     }
   }
