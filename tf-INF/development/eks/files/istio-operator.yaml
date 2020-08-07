@@ -22,7 +22,7 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-connection-draining-timeout: "60"
             service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "60"
             service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-            service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443,8443,15020,15443,31400"
+            service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443,15443"
 
 # apiVersion: install.istio.io/v1alpha2
 # kind: IstioControlPlane
