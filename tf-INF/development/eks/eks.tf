@@ -79,6 +79,7 @@ module "eks" {
       override_instance_types = ["t3a.medium", "t3a.large"]
       root_volume_size        = "20"
       asg_max_size            = 4
+      asg_min_size            = 0
       asg_desired_capacity    = 2
       kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
       # additional_userdata     = data.template_file.pod_restrict.rendered

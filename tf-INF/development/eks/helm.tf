@@ -20,6 +20,7 @@ resource "helm_release" "prometheus" {
   version    = "8.15.11"
   namespace  = kubernetes_namespace.monitoring.metadata.0.name
   lint       = true
+  wait       = false
 }
 
 //https://github.com/aws/eks-charts/tree/master/stable/aws-node-termination-handler
@@ -34,6 +35,7 @@ resource "helm_release" "node_termination_handler" {
   version    = "0.8.0"
   namespace  = "kube-system"
   lint       = true
+  wait       = false
 
   set {
     name  = "enablePrometheusServer"
@@ -60,6 +62,7 @@ resource "helm_release" "cluster_autoscaler" {
   version    = "7.3.4"
   namespace  = "kube-system"
   lint       = true
+  wait       = false
   set {
     name  = "autoDiscovery.enabled"
     value = true
@@ -86,8 +89,9 @@ resource "helm_release" "cluster_autoscaler" {
     value = true
   }
 }
-//gohabor https://goharbor.io/docs/2.0.0/install-config/harbor-ha-helm/
 
+//gohabor https://goharbor.io/docs/2.0.0/install-config/harbor-ha-helm/
+//chart: https://hub.helm.sh/charts/harbor/harbor
 resource "helm_release" "goharbor" {
   depends_on = [
     module.eks,
@@ -177,7 +181,7 @@ resource "helm_release" "goharbor" {
   # }
 }
 
-
+//https://hub.helm.sh/charts/bitnami/external-dns
 resource "helm_release" "external_dns" {
   depends_on = [
     module.eks,
@@ -189,6 +193,7 @@ resource "helm_release" "external_dns" {
   version    = "3.2.4"
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
   lint       = true
+  wait       = false
 
   # values = [
   #   # data.template_file.external_dns.rendered
@@ -248,6 +253,10 @@ resource "helm_release" "external_dns" {
   set {
     name  = "annotationFilter"
     value = "external-dns/enable=true"
+  }
+  set {
+    name  = "interval"
+    value = "1m"
   }
 }
 
