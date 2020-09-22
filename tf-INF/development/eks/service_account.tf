@@ -4,29 +4,26 @@ data "aws_iam_policy_document" "harbor" {
     actions = [
       "s3:Get*",
       "s3:ListBucket",
-      "s3:PutObject",
-      "s3:DeleteObject",
+      "s3:ListBucketMultipartUploads"
     ]
 
     resources = [
-      "${data.terraform_remote_state.s3.outputs.chart_arn}/*",
       "${data.terraform_remote_state.s3.outputs.chart_arn}",
     ]
   }
-}
-data "aws_iam_policy_document" "harbor_assume_role" {
   statement {
-    effect = "Allow"
-
-    principals {
-      type        = "Service"
-      identifiers = ["s3.amazonaws.com"]
-    }
-
-    actions = ["sts:AssumeRole"]
+    actions = [
+      "s3:PutObject",
+      "s3:GetObject",
+      "s3:DeleteObject",
+      "s3:ListMultipartUploadParts",
+      "s3:AbortMultipartUpload"
+    ]
+    resources = [
+      "${data.terraform_remote_state.s3.outputs.chart_arn}/*"
+    ]
   }
 }
-
 resource "aws_iam_policy" "harbor" {
   name   = "${var.environment}-s3-chart-harbor"
   policy = data.aws_iam_policy_document.harbor.json

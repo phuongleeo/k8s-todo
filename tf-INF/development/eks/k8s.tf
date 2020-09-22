@@ -3,7 +3,7 @@ provider "kubernetes" {
   cluster_ca_certificate = base64decode(data.aws_eks_cluster.eks.certificate_authority.0.data)
   token                  = data.aws_eks_cluster_auth.eks.token
   load_config_file       = false
-  version                = "~> 1.9"
+  version                = "~> 1.10"
 }
 //namespace
 resource "kubernetes_namespace" "bootstrap" {
@@ -73,6 +73,26 @@ resource "kubernetes_cluster_role_binding" "admin" {
   }
 }
 
+resource "kubernetes_service_account" "harbor" {
+  metadata {
+    name      = "harbor"
+    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+
+    annotations = {
+      "eks.amazonaws.com/role-arn"                  = module.harbor_role.this_iam_role_arn
+      "rbac.authorization.kubernetes.io/autoupdate" = true
+    }
+  }
+  secret {
+    name = kubernetes_secret.harbor.metadata.0.name
+  }
+}
+resource "kubernetes_secret" "harbor" {
+  metadata {
+    name      = "harbor"
+    namespace = kubernetes_namespace.bootstrap.metadata.0.name
+  }
+}
 //This is to create an extra kubernetes clusterrole for developers
 resource "kubernetes_cluster_role" "developer" {
   metadata {

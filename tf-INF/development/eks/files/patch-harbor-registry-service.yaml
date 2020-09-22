@@ -1,0 +1,41 @@
+data:
+  config.yml: |
+    version: 0.1
+    log:
+      level: info
+      fields:
+        service: registry
+    storage:
+      s3:
+        accesskey: ${accesskey}
+        secretkey: ${secretkey}
+        region: eu-central-1
+        regionendpoint: https://s3.eu-central-1.amazonaws.com
+        v4auth: true
+        bucket: starburst-development-chart-data
+        rootdirectory: harbor
+      cache:
+        layerinfo: redis
+      maintenance:
+        uploadpurging:
+          enabled: false
+      delete:
+        enabled: true
+      redirect:
+        disable: true
+    redis:
+      addr: "harbor-harbor-redis:6379"
+      db: 2
+    http:
+      addr: :5000
+      relativeurls: true
+      # set via environment variable
+      # secret: placeholder
+      debug:
+        addr: localhost:5001
+    auth:
+      htpasswd:
+        realm: harbor-registry-basic-realm
+        path: /etc/registry/passwd
+    validation:
+      disabled: true
