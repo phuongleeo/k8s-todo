@@ -54,35 +54,21 @@ module "eks" {
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
 
   worker_groups = [
-    # {
-    #   instance_type                 = "m5a.large"
-    #   asg_max_size                  = 2
-    #   asg_desired_capacity          = 1
-    #   key_name                      = var.ssh_key_name
-    #   kubelet_extra_args            = "--node-labels=spot=false"
-    #   suspended_processes           = ["AZRebalance"]
-    #   additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
-    #   root_volume_size              = "20"
-    #
-    #   tags = concat(
-    #     list(map(
-    #       "propagate_at_launch", true,
-    #       "key", "Group",
-    #     "value", "${var.environment}"))
-    #   )
-    # }
   ]
   worker_groups_launch_template = [
     {
-      name                    = "spot-1"
-      spot_price              = "0.2"
-      override_instance_types = ["t3a.medium", "t3a.large"]
-      root_volume_size        = "20"
-      asg_max_size            = 4
-      asg_min_size            = 0
-      asg_desired_capacity    = 2
-      kubelet_extra_args      = "--node-labels=node.kubernetes.io/lifecycle=spot"
-      # additional_userdata     = data.template_file.pod_restrict.rendered
+      //https://aws.amazon.com/blogs/opensource/announcing-the-general-availability-of-bottlerocket-an-open-source-linux-distribution-purpose-built-to-run-containers/
+      name                          = "spot-1"
+      spot_price                    = "0.2"
+      override_instance_types       = ["t3a.medium", "t3a.large"]
+      root_volume_size              = "20"
+      asg_max_size                  = 4
+      asg_min_size                  = 0
+      asg_desired_capacity          = 2
+      kubelet_extra_args            = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      additional_userdata           = data.template_file.pod_restrict.rendered
+      suspended_processes           = ["AZRebalance"]
+      additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
     }
 
   ]
@@ -93,13 +79,21 @@ module "eks" {
   ))
 }
 
+resource "local_file" "istio_operator" {
+  content = templatefile("files/istio-operator.yaml.tmpl", {
+  CERT_ARN = data.terraform_remote_state.setup.outputs.cert_arn })
+  filename = "files/istio-operator.yaml"
+}
+
 resource "null_resource" "install_istio" {
+  count = var.ingress_istio ? 1 : 0
   depends_on = [
     module.eks
   ]
 
   triggers = {
     cluster_endpoint = module.eks.cluster_endpoint
+    uuid             = uuid()
   }
 
   provisioner "local-exec" {
@@ -107,9 +101,8 @@ resource "null_resource" "install_istio" {
     interpreter = ["/bin/bash"]
     environment = {
       KUBECONFIG      = pathexpand("${path.cwd}/kubeconfig_${local.cluster_name}")
-      BINARY_DIR      = pathexpand("${path.cwd}/files/istio-1.6.5")
-      ISTIO_VERSION   = "1.6.5"
-      ISTIO_OVERWRITE = pathexpand("${path.cwd}/files/istio-operator.yaml")
+      ISTIO_VERSION   = "1.6.9"
+      ISTIO_OVERWRITE = pathexpand("${path.cwd}/${local_file.istio_operator.filename}")
       CERT_ARN        = data.terraform_remote_state.setup.outputs.cert_arn
     }
   }

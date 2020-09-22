@@ -1,5 +1,0 @@
-metadata:
-  annotations:
-    - app.kubernetes.io/managed-by: Helm
-    - meta.helm.sh/release-name": argo-events
-    - meta.helm.sh/release-namespace: ${namespace}
