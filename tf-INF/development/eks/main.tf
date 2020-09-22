@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key = "stacks/eks"
+    key = "stacks/eksv2"
   }
 }
 
@@ -61,6 +61,17 @@ data "terraform_remote_state" "setup" {
   config = {
     bucket = "${var.remote_state_bucket}"
     key    = "stacks/setup"
+    region = "${var.aws_region}"
+  }
+
+  workspace = "${terraform.workspace}"
+}
+data "terraform_remote_state" "iam" {
+  backend = "s3"
+
+  config = {
+    bucket = "${var.remote_state_bucket}"
+    key    = "stacks/iam"
     region = "${var.aws_region}"
   }
 
