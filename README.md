@@ -11,7 +11,7 @@ Kubernetes Production Runtime (BKPR) ( This project is being worked in progress 
 - Ingress
  - [Istio](https://github.com/istio/istio)
 
-   <img src="https://avatars3.githubusercontent.com/u/23534644?s=200&v=4" width="70%">
+   <img src="https://avatars3.githubusercontent.com/u/23534644?s=200&v=4" width="40%">
 
   - [Nginx](https://kubernetes.github.io/ingress-nginx/)
 
