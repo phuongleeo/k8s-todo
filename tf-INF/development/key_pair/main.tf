@@ -7,7 +7,7 @@ module "kms_key" {
   source                  = "cloudposse/kms-key/aws"
   version                 = "0.4.0"
   stage                   = var.environment
-  name                    = "eks-dev.pem"
+  name                    = "eks-${var.environment}.pem"
   description             = "KMS SSH key"
   deletion_window_in_days = 30
   enable_key_rotation     = false
@@ -18,7 +18,7 @@ module "ssh_key_pair" {
   version           = "0.4.0"
   stage             = var.environment
   kms_key_id        = module.kms_key.key_id
-  name              = "eks-dev.pem"
+  name              = "eks-${var.environment}.pem"
   ssm_path_prefix   = "ssh_keys"
   ssh_key_algorithm = "RSA"
   tags              = "${local.common_tags}"
