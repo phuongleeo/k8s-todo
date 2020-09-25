@@ -1,0 +1,12 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: proxy-protocol
+spec:
+  configPatches:
+  - applyTo: LISTENER
+    patch:
+      operation: MERGE
+      value:
+        listener_filters:
+        - name: envoy.listener.proxy_protocol

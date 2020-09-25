@@ -1,0 +1,8 @@
+{
+  "apiVersion" = "v1"
+  "kind" = "Secret"
+  "metadata" = {
+    "name" = "elastic-webhook-server-cert"
+    "namespace" = "elastic-system"
+  }
+}
