@@ -23,19 +23,19 @@
 #   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
 #   lint       = true
 # }
-# # resource "helm_release" "argo_events" {
-# #   name       = "argo-events"
-# #   repository = local.char_repository["argocd"]
-# #   chart      = "argo-events"
-# #   version    = "0.14.0"
-# #   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
-# #   lint       = true
-# #   values = [
-# #     templatefile("files/argo.yaml", {
-# #     namespace = kubernetes_namespace.bootstrap.metadata.0.name
-# #     })
-# #   ]
-# # }
+# resource "helm_release" "argo_events" {
+#   name       = "argo-events"
+#   repository = local.char_repository["argocd"]
+#   chart      = "argo-events"
+#   version    = "0.14.0"
+#   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
+#   lint       = true
+#   values = [
+#     templatefile("files/argo.yaml", {
+#     namespace = kubernetes_namespace.bootstrap.metadata.0.name
+#     })
+#   ]
+# }
 # resource "helm_release" "argo_rollouts" {
 #   name       = "argo-rollouts"
 #   repository = local.char_repository["argocd"]

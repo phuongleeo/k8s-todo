@@ -9,20 +9,20 @@ provider "helm" {
 }
 
 //prometheus-operator https://github.com/helm/charts/tree/master/stable/prometheus-operator
-# resource "helm_release" "prometheus" {
+resource "helm_release" "prometheus" {
 
-#   depends_on = [
-#     module.eks,
-#     null_resource.install_istio
-#   ]
-#   name       = "prometheus-operator"
-#   repository = local.char_repository["stable"]
-#   chart      = "prometheus-operator"
-#   version    = "8.15.11"
-#   namespace  = kubernetes_namespace.monitoring.metadata.0.name
-#   lint       = true
-#   wait       = false
-# }
+  depends_on = [
+    module.eks,
+    null_resource.install_istio
+  ]
+  name       = "prometheus-operator"
+  repository = local.char_repository["stable"]
+  chart      = "prometheus-operator"
+  version    = "8.15.11"
+  namespace  = kubernetes_namespace.monitoring.metadata.0.name
+  lint       = true
+  wait       = false
+}
 
 //https://github.com/aws/eks-charts/tree/master/stable/aws-node-termination-handler
 resource "helm_release" "node_termination_handler" {
