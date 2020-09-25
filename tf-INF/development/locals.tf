@@ -5,8 +5,7 @@ locals {
     "Provisioner" = "Terraform"
   }
 
-  domain     = "${var.domain_env}.new-${var.squad}.ryte.tech"
-  eks_domain = "eks.${local.domain}"
+  eks_domain = var.domain_name
 }
 
 locals {

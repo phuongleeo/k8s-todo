@@ -49,7 +49,7 @@ module "eks" {
   map_accounts                    = [var.aws_account]
   enable_irsa                     = true
   cluster_endpoint_private_access = true
-  cluster_endpoint_public_access  = true // terraform plan -target=module.eks_services.aws_eks_cluster.this -out plan
+  cluster_endpoint_public_access  = true
   # cluster_endpoint_public_access_cidrs = local.whitelist_ips
   worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
 
@@ -108,7 +108,7 @@ resource "null_resource" "install_istio" {
   }
 }
 
-//update only if subnets was created before
+//update only if there are existed subnets
 # resource "aws_subnet" "subnet_public" {
 #   for_each   = data.aws_subnet.cidr_public
 #   vpc_id     = data.aws_vpc.development.id

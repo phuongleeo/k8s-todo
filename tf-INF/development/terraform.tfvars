@@ -1,21 +1,19 @@
-aws_account = "073251215989"
+aws_account = "xxxxx"
 
-aws_region = "eu-central-1"
+aws_region = "ap-southeast-1"
 
 environment = "development"
 
 domain_env = "dev"
 
+domain_name = "my-own-eks.name"
+
 cidr_v4 = "10.51.0.0/21"
 
-ssh_key_name = "ses-dev.pem"
+ssh_key_name = "my-key.pem"
 
-remote_state_bucket = "eu-central-1-default-eks-development-state"
+remote_state_bucket = "ap-southeast-1-default-eks-development-state"
 
-jumphost_sg = "sg-0bb665a0655dffab3"
-
-vpc_id = "vpc-0c0d7bf840b1d4527"
+vpc_id = "vpc-xxxxx"
 
 project = "starburst"
-
-squad = "ses"
