@@ -3,7 +3,7 @@ data "template_file" "pod_restrict" {
 }
 resource "aws_security_group" "worker_group_mgmt_one" {
   name_prefix = "worker_group_mgmt_one"
-  vpc_id      = data.aws_vpc.development.id
+  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
   ingress {
     from_port = 22
@@ -18,7 +18,7 @@ resource "aws_security_group" "worker_group_mgmt_one" {
 
 resource "aws_security_group" "all_worker_mgmt" {
   name_prefix = "all_worker_management"
-  vpc_id      = data.aws_vpc.development.id
+  vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
   ingress {
     from_port = 22
@@ -42,8 +42,8 @@ module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
   cluster_name                    = local.cluster_name
   cluster_version                 = "1.17"
-  subnets                         = data.aws_subnet_ids.private.ids
-  vpc_id                          = data.aws_vpc.development.id
+  subnets                         = data.terraform_remote_state.vpc.outputs.subnet_private
+  vpc_id                          = data.terraform_remote_state.vpc.outputs.vpc_id
   write_kubeconfig                = true
   config_output_path              = "kubeconfig_${local.cluster_name}"
   map_accounts                    = [var.aws_account]
