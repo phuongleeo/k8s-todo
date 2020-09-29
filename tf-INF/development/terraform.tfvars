@@ -8,7 +8,7 @@ domain_env = "dev"
 
 domain_name = "my-own-eks.name"
 
-cidr_v4 = "10.51.0.0/21"
+cidr_v4 = "10.51.0.0/16"
 
 ssh_key_name = "my-key.pem"
 
