@@ -14,7 +14,7 @@ data "terraform_remote_state" "s3" {
     region = "${var.aws_region}"
   }
 
-  workspace = "${terraform.workspace}"
+  workspace = terraform.workspace
 }
 
 data "terraform_remote_state" "route53" {
@@ -26,7 +26,7 @@ data "terraform_remote_state" "route53" {
     region = "${var.aws_region}"
   }
 
-  workspace = "${terraform.workspace}"
+  workspace = terraform.workspace
 }
 data "terraform_remote_state" "setup" {
   backend = "s3"
@@ -37,7 +37,7 @@ data "terraform_remote_state" "setup" {
     region = "${var.aws_region}"
   }
 
-  workspace = "${terraform.workspace}"
+  workspace = terraform.workspace
 }
 data "terraform_remote_state" "iam" {
   backend = "s3"
@@ -48,7 +48,7 @@ data "terraform_remote_state" "iam" {
     region = "${var.aws_region}"
   }
 
-  workspace = "${terraform.workspace}"
+  workspace = terraform.workspace
 }
 data "terraform_remote_state" "vpc" {
   backend = "s3"
@@ -59,5 +59,5 @@ data "terraform_remote_state" "vpc" {
     region = "${var.aws_region}"
   }
 
-  workspace = "${terraform.workspace}"
+  workspace = terraform.workspace
 }

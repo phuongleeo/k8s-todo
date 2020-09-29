@@ -12,20 +12,17 @@ output "cluster_auth_token" {
 output "kubeconfig_filename" {
   value = module.eks.kubeconfig_filename
 }
-# output "admin_sa" {
-#   value = "${kubernetes_service_account.cluster_admin.metadata}"
-# }
 
 output "auth_cm" {
-  value = "${module.eks.config_map_aws_auth}"
+  value = module.eks.config_map_aws_auth
 }
 
 output "oidc_provider_arn" {
-  value = "${module.eks.oidc_provider_arn}"
+  value = module.eks.oidc_provider_arn
 }
 
 output "cluster_oidc_issuer_url" {
-  value = "${module.eks.cluster_oidc_issuer_url}"
+  value = module.eks.cluster_oidc_issuer_url
 }
 
 # output "charts_name" {

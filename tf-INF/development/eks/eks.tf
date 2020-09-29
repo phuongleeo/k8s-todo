@@ -2,6 +2,7 @@ data "template_file" "pod_restrict" {
   template = file("userdata/pod_restrict.sh")
 }
 resource "aws_security_group" "worker_group_mgmt_one" {
+  description = "default secgroup for worker nodes"
   name_prefix = "worker_group_mgmt_one"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
@@ -17,6 +18,7 @@ resource "aws_security_group" "worker_group_mgmt_one" {
 }
 
 resource "aws_security_group" "all_worker_mgmt" {
+  description = "default secgroup for worker nodes"
   name_prefix = "all_worker_management"
   vpc_id      = data.terraform_remote_state.vpc.outputs.vpc_id
 
