@@ -1,6 +1,6 @@
 terraform {
   backend "s3" {
-    key = "stacks/eksv2"
+    key = "stacks/eks"
   }
 }
 
