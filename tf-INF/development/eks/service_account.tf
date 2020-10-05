@@ -1,3 +1,4 @@
+//cluster with OIDC https://medium.com/@marcincuber/amazon-eks-with-oidc-provider-iam-roles-for-kubernetes-services-accounts-59015d15cb0c
 //harbor
 data "aws_iam_policy_document" "harbor" {
   statement {

@@ -11,7 +11,6 @@ spec:
             requests:
               cpu: 200m
           serviceAnnotations:
-            service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
             service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "${CERT_ARN}"
             service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
             service.beta.kubernetes.io/aws-load-balancer-ssl-negotiation-policy: "ELBSecurityPolicy-TLS-1-2-2017-01"
@@ -23,7 +22,7 @@ spec:
             service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "443,15443"
             service.kubernetes.io/load-balancer-cleanup: "true"
           service:
-            externalTrafficPolicy: "Local"
+            externalTrafficPolicy: "Cluster" #https://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
             ports:
               - name: status-port
                 port: 15021

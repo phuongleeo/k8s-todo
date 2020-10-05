@@ -95,7 +95,7 @@ resource "null_resource" "install_istio" {
 
   triggers = {
     cluster_endpoint = module.eks.cluster_endpoint
-    uuid             = uuid()
+    # uuid             = uuid()
   }
 
   provisioner "local-exec" {
