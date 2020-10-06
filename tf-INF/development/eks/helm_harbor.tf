@@ -1,8 +1,10 @@
 data "template_file" "harbor_registry_patch" {
   template = file("files/patch-harbor-registry-service.yaml")
   vars = {
-    accesskey = data.terraform_remote_state.iam.outputs.harbor_access_key
-    secretkey = data.terraform_remote_state.iam.outputs.harbor_secret_key
+    accesskey         = data.terraform_remote_state.iam.outputs.harbor_access_key
+    secretkey         = data.terraform_remote_state.iam.outputs.harbor_secret_key
+    aws_region        = var.aws_region
+    imagechart_bucket = data.terraform_remote_state.s3.outputs.chart_name
   }
 }
 
