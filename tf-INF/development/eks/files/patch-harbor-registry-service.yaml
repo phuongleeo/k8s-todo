@@ -9,10 +9,10 @@ data:
       s3:
         accesskey: ${accesskey}
         secretkey: ${secretkey}
-        region: "ap-southeast-1"
-        regionendpoint: https://s3.ap-southeast-1.amazonaws.com
+        region: "${aws_region}"
+        regionendpoint: https://s3.${aws_region}.amazonaws.com
         v4auth: true
-        bucket: eks-development-chart-data
+        bucket: "${imagechart_bucket}"
         rootdirectory: harbor
       cache:
         layerinfo: redis
