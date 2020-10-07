@@ -1,0 +1,57 @@
+#https://github.com/goharbor/harbor-helm/issues/77
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: harbor
+spec:
+  gateways:
+    - wildcard-gateway
+  hosts:
+    - harbor.${MY_DOMAIN}
+  http:
+    - match:
+        - uri:
+            prefix: '/c/'
+      route:
+        - destination:
+            host: harbor-core
+    - match:
+        - uri:
+            prefix: '/api/'
+      route:
+        - destination:
+            host: harbor-core
+    - match:
+        - uri:
+            prefix: '/v2/'
+      route:
+        - destination:
+            host: harbor-registry
+            port:
+              number: 5000
+    - match:
+        - uri:
+            prefix: '/v1/'
+      route:
+        - destination:
+            host: harbor-registry
+            port:
+              number: 5000
+      fault:
+        abort:
+          httpStatus: 404
+    - match:
+        - uri:
+            prefix: '/service/'
+      route:
+        - destination:
+            host: harbor-core
+    - match:
+        - uri:
+            prefix: '/chartrepo/'
+      route:
+        - destination:
+            host: harbor-core
+    - route:
+        - destination:
+            host: harbor-portal
