@@ -1,0 +1,82 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: bookinfo-gateway
+  namespace: default
+  annotations:
+    external-dns: enable
+spec:
+  selector:
+    istio: ingressgateway # use istio default controller
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+    tls:
+      httpsRedirect: true #fas   sends 301 redirect for http requests
+  - port:
+      number: 443
+      name: https
+      protocol: HTTP
+    hosts:
+    - "httpbin.eks.dev.new-ses.ryte.tech"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: bookinfo-http
+  namespace: default
+spec:
+  hosts:
+  - "bookinfo.eks.dev.new-ses.ryte.tech"
+  gateways:
+  - bookinfo-gateway
+  http:
+  - match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: productpage.default.svc.cluster.local
+        port:
+          number: 9080
+      weight: 100
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: httpbin
+  namespace: default
+spec:
+  hosts:
+  - "httpbin.eks.dev.new-ses.ryte.tech"
+  gateways:
+  - bookinfo-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /status
+    - uri:
+        prefix: /delay
+    - uri:
+        prefix: /headers
+    - uri:
+        prefix: /get
+    - uri:
+        prefix: /ip
+    route:
+    - destination:
+        host: httpbin.default.svc.cluster.local
+        port:
+          number: 8000
