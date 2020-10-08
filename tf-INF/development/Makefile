@@ -15,10 +15,6 @@ all-init:
 	#$(MAKE) -f Makefile.aws.mk init
 	$(foreach dir,$(directories),(cd $(dir) && make init) &&) :
 
-all-symlink:
-	#$(MAKE) -f Makefile.aws.mk init
-	$(foreach dir,$(directories),(cd $(dir) && ../../helpers/import_symlink.sh) &&) :
-
 all-clean:
 	rm -rf */.terraform
 	rm -rf */terraform.tfstate*
