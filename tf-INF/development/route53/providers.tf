@@ -1,7 +1,3 @@
-provider "kubernetes-alpha" {
-  server_side_planning = true
-}
-
 provider "aws" {
   allowed_account_ids = [var.aws_account]
 
