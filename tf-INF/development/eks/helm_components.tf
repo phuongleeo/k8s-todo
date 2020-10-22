@@ -206,4 +206,53 @@ resource "helm_release" "nginx_ingress" {
     name  = "controller.service.targetPorts.https"
     value = "http"
   }
+  //expose metrics
+  set {
+    name  = "controller.metrics.enabled"
+    value = "true"
+    type  = "string"
+  }
+  set {
+    name  = "controller.metrics.service.annotations.prometheus\\.io/scrape"
+    value = "true"
+    type  = "string"
+  }
+  set {
+    name  = "controller.metrics.service.annotations.prometheus\\.io/port"
+    value = 10254
+    type  = "string"
+  }
+}
+//EFS driver
+resource "helm_release" "efs_csi" {
+  depends_on = [
+    module.eks,
+    null_resource.install_istio
+  ]
+  name       = "efs-csi"
+  repository = local.char_repository["efs-csi"]
+  chart      = "aws-efs-csi-driver"
+  version    = "0.1.0"
+  namespace  = "kube-system"
+  lint       = true
+  wait       = false
+}
+//metrics server
+resource "helm_release" "metrics_server" {
+  depends_on = [
+    module.eks,
+    null_resource.install_istio
+  ]
+  name       = "metrics-server"
+  repository = local.char_repository["stable"]
+  chart      = "metrics-server"
+  version    = "2.11.2"
+  namespace  = "kube-system"
+  lint       = true
+  wait       = false
+  set {
+    name  = "args[0]"
+    value = "--kubelet-preferred-address-types=InternalIP"
+    type  = "string"
+  }
 }
