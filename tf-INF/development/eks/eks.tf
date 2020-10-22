@@ -31,13 +31,12 @@ resource "aws_security_group" "all_worker_mgmt" {
       var.cidr_v4
     ]
   }
-}
-data "aws_eks_cluster" "eks" {
-  name = module.eks.cluster_id
-}
-
-data "aws_eks_cluster_auth" "eks" {
-  name = module.eks.cluster_id
+  ingress {
+    description = "permit EFS filesystem"
+    from_port   = 2049
+    to_port     = 2049
+    protocol    = "tcp"
+  }
 }
 
 module "eks" {
@@ -95,7 +94,6 @@ resource "null_resource" "install_istio" {
 
   triggers = {
     cluster_endpoint = module.eks.cluster_endpoint
-    # uuid             = uuid()
   }
 
   provisioner "local-exec" {
@@ -109,23 +107,3 @@ resource "null_resource" "install_istio" {
     }
   }
 }
-
-//update only if there are existed subnets
-# resource "aws_subnet" "subnet_public" {
-#   for_each   = data.aws_subnet.cidr_public
-#   vpc_id     = data.aws_vpc.development.id
-#   cidr_block = each.value.cidr_block
-#   tags = {
-#     "kubernetes.io/role/elb"                      = 1
-#     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-#   }
-# }
-# resource "aws_subnet" "subnet_private" {
-#   for_each   = data.aws_subnet.cidr_private
-#   vpc_id     = data.aws_vpc.development.id
-#   cidr_block = each.value.cidr_block
-#   tags = {
-#     "kubernetes.io/role/internal-elb"             = 1
-#     "kubernetes.io/cluster/${local.cluster_name}" = "shared"
-#   }
-# }

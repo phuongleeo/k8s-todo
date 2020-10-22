@@ -18,3 +18,6 @@ locals {
   external_dns_sa_name     = "external-dns"
   harbor_sa_name           = "harbor"
 }
+locals {
+  k8s_efs_driver = "efs.csi.aws.com"
+}
