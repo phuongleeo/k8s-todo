@@ -9,7 +9,7 @@ resource "kubernetes_manifest" "virtualservice_httpbin" {
     }
     "spec" = {
       "gateways" = [
-        "bookinfo-gateway",
+        "httpbin-gateway",
       ]
       "hosts" = [
         "httpbin.${var.domain_name}",

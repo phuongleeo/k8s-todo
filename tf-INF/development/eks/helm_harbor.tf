@@ -11,7 +11,7 @@ data "template_file" "harbor_registry_patch" {
 # //gohabor https://goharbor.io/docs/2.0.0/install-config/harbor-ha-helm/
 # //chart: https://hub.helm.sh/charts/harbor/harbor
 resource "helm_release" "goharbor" {
-  count = var.harbor_enable ? 1 : 0
+  count = local.harbor_enable ? 1 : 0
   depends_on = [
     module.eks,
     null_resource.install_istio
@@ -38,7 +38,7 @@ resource "helm_release" "goharbor" {
   }
   set {
     name  = "expose.ingress.annotations.kubernetes\\.io/ingress\\.class"
-    value = "%{if var.ingress_nginx}nginx%{else}istio%{endif}"
+    value = "%{if local.enable_ingress_nginx}nginx%{else}istio%{endif}"
   }
   set {
     name  = "expose.ingress.annotations.external-dns"

@@ -112,3 +112,91 @@ resource "kubernetes_cluster_role" "developer" {
     verbs      = ["create"]
   }
 }
+
+
+//image pull secret
+resource "aws_ssm_parameter" "quay_registry_username" {
+  name        = "quay-registry-username"
+  description = "credentials for pulling images"
+  type        = "SecureString"
+  value       = "to_be_changed"
+  overwrite   = true
+  tags        = local.common_tags
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+resource "aws_ssm_parameter" "quay_registry_password" {
+  name        = "quay-registry-password"
+  description = "credentials for pulling images"
+  type        = "SecureString"
+  value       = "to_be_changed"
+  overwrite   = true
+  tags        = local.common_tags
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+resource "aws_ssm_parameter" "github_registry_username" {
+  name        = "github-registry-username"
+  description = "credentials for pulling images"
+  type        = "SecureString"
+  overwrite   = true
+  value       = "to_be_changed"
+  tags        = local.common_tags
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+resource "aws_ssm_parameter" "github_registry_password" {
+  name        = "github-registry-password"
+  description = "credentials for pulling images"
+  type        = "SecureString"
+  overwrite   = true
+  value       = "to_be_changed"
+  tags        = local.common_tags
+  lifecycle {
+    ignore_changes = [value]
+  }
+}
+//this equivalent to the kubectl command
+//$ kubectl create secret docker-registry docker-cfg --docker-server=${registry_server} --docker-username=${registry_username} --docker-password=${registry_password}
+resource "kubernetes_secret" "quay_registry_credentials" {
+  metadata {
+    name = "quay-docker-cfg"
+  }
+
+  data = {
+    ".dockerconfigjson" = <<DOCKER
+{
+  "auths": {
+    "${local.quay_registry_server}": {
+      "auth": "${base64encode("${aws_ssm_parameter.quay_registry_username.value}:${aws_ssm_parameter.quay_registry_password.value}")}"
+    }
+  }
+}
+DOCKER
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+}
+
+resource "kubernetes_secret" "github_registry_credentials" {
+  metadata {
+    name = "github-docker-cfg"
+  }
+
+  data = {
+    ".dockerconfigjson" = <<DOCKER
+{
+  "auths": {
+    "${local.github_registry_server}": {
+      "auth": "${base64encode("${aws_ssm_parameter.github_registry_username.value}:${aws_ssm_parameter.github_registry_password.value}")}"
+    }
+  }
+}
+DOCKER
+  }
+
+  type = "kubernetes.io/dockerconfigjson"
+}

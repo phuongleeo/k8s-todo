@@ -159,7 +159,7 @@ resource "helm_release" "external_dns" {
 }
 
 resource "helm_release" "nginx_ingress" {
-  count = var.ingress_nginx ? 1 : 0
+  count = local.enable_ingress_nginx ? 1 : 0
   depends_on = [
     module.eks,
     null_resource.install_istio

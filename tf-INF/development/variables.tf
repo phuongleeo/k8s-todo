@@ -18,15 +18,4 @@ variable "ssh_key_name" {}
 
 variable "vpc_id" {}
 
-variable "ingress_istio" {
-  default = true
-}
-
-variable "ingress_nginx" {
-  default = true
-}
-variable "harbor_enable" {
-  default = false
-}
-
 variable "domain_name" {}

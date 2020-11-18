@@ -36,23 +36,30 @@ resource "aws_security_group" "all_worker_mgmt" {
     from_port   = 2049
     to_port     = 2049
     protocol    = "tcp"
+
+    cidr_blocks = [
+      var.cidr_v4
+    ]
   }
 }
 
 module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
+  version                         = "13.0.0"
   cluster_name                    = local.cluster_name
   cluster_version                 = "1.17"
   subnets                         = data.terraform_remote_state.vpc.outputs.subnet_private
   vpc_id                          = data.terraform_remote_state.vpc.outputs.vpc_id
   write_kubeconfig                = true
-  config_output_path              = "kubeconfig_${local.cluster_name}"
+  config_output_path              = pathexpand("~/.kube/kubeconfig_${local.cluster_name}")
   map_accounts                    = [var.aws_account]
   enable_irsa                     = true
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
   # cluster_endpoint_public_access_cidrs = local.whitelist_ips
-  worker_additional_security_group_ids = [aws_security_group.all_worker_mgmt.id]
+  worker_additional_security_group_ids       = [aws_security_group.all_worker_mgmt.id]
+  workers_additional_policies                = [aws_iam_policy.workers_ecr.arn]
+  kubeconfig_aws_authenticator_env_variables = { AWS_PROFILE = "default" }
 
   worker_groups = [
   ]
@@ -70,6 +77,9 @@ module "eks" {
       additional_userdata           = data.template_file.pod_restrict.rendered
       suspended_processes           = ["AZRebalance"]
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
+      //https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/enable-docker-bridge-network.md
+      bootstrap_extra_args = "--enable-docker-bridge true"
+
     }
 
   ]
@@ -79,6 +89,29 @@ module "eks" {
       "k8s.io/cluster-autoscaler/${local.cluster_name}", true
   ))
 }
+//ECR policy
+data "aws_iam_policy_document" "workers_ecr" {
+  statement {
+    actions = [
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:BatchGetImage",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:GetAuthorizationToken",
+      "ecr:PutImage",
+      "ecr:InitiateLayerUpload",
+      "ecr:UploadLayerPart",
+      "ecr:CompleteLayerUpload"
+    ]
+
+    resources = [
+      "*",
+    ]
+  }
+}
+resource "aws_iam_policy" "workers_ecr" {
+  name   = "${var.environment}-workers-ecr"
+  policy = data.aws_iam_policy_document.workers_ecr.json
+}
 
 resource "local_file" "istio_operator" {
   content = templatefile("files/istio-operator.yaml.tmpl", {
@@ -87,7 +120,7 @@ resource "local_file" "istio_operator" {
 }
 
 resource "null_resource" "install_istio" {
-  count = var.ingress_istio ? 1 : 0
+  count = local.enable_ingress_istio ? 1 : 0
   depends_on = [
     module.eks
   ]

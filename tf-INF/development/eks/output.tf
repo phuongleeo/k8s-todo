@@ -6,15 +6,8 @@ output "cluster_ca" {
   value = module.eks.cluster_certificate_authority_data
 }
 
-output "cluster_auth_token" {
-  value = data.aws_eks_cluster_auth.eks.token
-}
 output "kubeconfig_filename" {
   value = module.eks.kubeconfig_filename
-}
-
-output "auth_cm" {
-  value = module.eks.config_map_aws_auth
 }
 
 output "oidc_provider_arn" {
@@ -24,10 +17,12 @@ output "oidc_provider_arn" {
 output "cluster_oidc_issuer_url" {
   value = module.eks.cluster_oidc_issuer_url
 }
+output "worker_secgroup_id" {
+  value = aws_security_group.all_worker_mgmt.id
+}
+output "image_pull_secret" {
+  value = map(
+    local.quay_registry_server, kubernetes_secret.quay_registry_credentials.metadata[0].name,
+  local.github_registry_server, kubernetes_secret.github_registry_credentials.metadata[0].name)
+}
 
-# output "charts_name" {
-#   value = list(helm_release.prometheus.chart,
-#     helm_release.node_termination_handler.chart,
-#     helm_release.goharbor.chart,
-#   helm_release.external_dns.chart)
-# }

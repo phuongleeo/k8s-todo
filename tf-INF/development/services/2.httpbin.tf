@@ -59,6 +59,9 @@ resource "kubernetes_deployment" "httpbin" {
           }
         }
         service_account_name = kubernetes_service_account.httpbin.metadata.0.name
+        image_pull_secrets {
+          name = lookup(data.terraform_remote_state.eks.outputs.image_pull_secret, local.quay_registry_server)
+        }
         volume {
           name = "gp2"
           persistent_volume_claim {
