@@ -1,4 +1,4 @@
-resource "kubernetes_manifest" "bookinfo_gateway" {
+resource "kubernetes_manifest" "httpbin_gateway" {
   provider = kubernetes-alpha
   manifest = {
     "apiVersion" = "networking.istio.io/v1beta1"
@@ -7,7 +7,7 @@ resource "kubernetes_manifest" "bookinfo_gateway" {
       "annotations" = {
         "external-dns" = "enable"
       }
-      "name"      = "bookinfo-gateway"
+      "name"      = "httpbin-gateway"
       "namespace" = "default"
     }
     "spec" = {

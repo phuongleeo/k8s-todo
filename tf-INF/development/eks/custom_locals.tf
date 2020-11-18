@@ -14,6 +14,7 @@ locals {
     "cloudposse"    = "https://charts.cloudposse.com/incubator/"
     "ingress-nginx" = "https://kubernetes.github.io/ingress-nginx"
     "center"        = "https://repo.chartcenter.io"
+    "efs-csi"       = "https://kubernetes-sigs.github.io/aws-efs-csi-driver/"
   }
 }
 

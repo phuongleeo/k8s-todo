@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "chart" {
   }
 
   tags = merge(local.common_tags,
-        map("Name"        ,"${var.project}-${var.environment}-chart-data"))
+  map("Name", "${var.project}-${var.environment}-chart-data"))
 
   server_side_encryption_configuration {
     rule {
