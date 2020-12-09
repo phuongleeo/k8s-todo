@@ -21,7 +21,7 @@ module "ssh_key_pair" {
   name              = "eks-${var.environment}.pem"
   ssm_path_prefix   = "ssh_keys"
   ssh_key_algorithm = "RSA"
-  tags              = "${local.common_tags}"
+  tags              = local.common_tags
 }
 
 resource "aws_key_pair" "eks" {
@@ -29,7 +29,7 @@ resource "aws_key_pair" "eks" {
   public_key = module.ssh_key_pair.public_key
 }
 data "aws_ssm_parameter" "eks" {
-  depends_on      = ["module.ssh_key_pair"]
+  depends_on      = [module.ssh_key_pair]
   name            = module.ssh_key_pair.ssh_private_key_ssm_path
   with_decryption = true
 }

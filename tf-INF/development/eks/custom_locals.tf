@@ -1,10 +1,13 @@
 locals {
-  namespace = ["bootstrap", "monitoring"]
+  namespace = ["bootstrap", "monitoring", "argocd"]
 }
-
+locals {
+  spot_instances = true
+  bid_price      = "0.2"
+}
 locals {
   char_repository = {
-    "stable"        = "https://kubernetes-charts.storage.googleapis.com"
+    "stable"        = "https://charts.helm.sh/stable"
     "eks"           = "https://aws.github.io/eks-charts"
     "harbor"        = "https://helm.goharbor.io"
     "bitnami"       = "https://charts.bitnami.com/bitnami"

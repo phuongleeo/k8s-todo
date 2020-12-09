@@ -19,9 +19,10 @@ locals {
   harbor_sa_name           = "harbor"
 }
 locals {
-  enable_ingress_istio   = true
+  enable_ingress_istio   = false
   enable_ingress_nginx   = true
   harbor_enable          = false
+  enable_jx              = true
   k8s_efs_driver         = "efs.csi.aws.com"
   quay_registry_server   = "quay.io"
   github_registry_server = "docker.pkg.github.com"

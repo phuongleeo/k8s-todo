@@ -138,7 +138,7 @@ resource "helm_release" "goharbor" {
           kubectl rollout restart -n ${kubernetes_namespace.bootstrap.metadata.0.name} deploy/harbor-harbor-registry
 EOF
     environment = {
-      KUBECONFIG = pathexpand("${path.cwd}/kubeconfig_${local.cluster_name}")
+      KUBECONFIG = pathexpand("~/.kube/kubeconfig_${local.cluster_name}")
     }
   }
 }

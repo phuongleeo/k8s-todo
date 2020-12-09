@@ -66,22 +66,21 @@ module "eks" {
   worker_groups_launch_template = [
     {
       //https://aws.amazon.com/blogs/opensource/announcing-the-general-availability-of-bottlerocket-an-open-source-linux-distribution-purpose-built-to-run-containers/
-      name                          = "spot-1"
-      spot_price                    = "0.2"
+      name                          = "%{if local.spot_instances}spot-1%{else}on-demand%{endif}"
+      spot_price                    = "%{if local.spot_instances}local.bid_price%{endif}"
       override_instance_types       = ["t3a.medium", "t3a.large"]
       root_volume_size              = "20"
       asg_max_size                  = 4
       asg_min_size                  = 0
       asg_desired_capacity          = 2
-      kubelet_extra_args            = "--node-labels=node.kubernetes.io/lifecycle=spot"
+      key_name                      = data.terraform_remote_state.key_pair.outputs.key_name
+      kubelet_extra_args            = "%{if local.spot_instances}--node-labels=node.kubernetes.io/lifecycle=spot%{else}--node-labels=node.kubernetes.io/lifecycle=normal%{endif}"
       additional_userdata           = data.template_file.pod_restrict.rendered
       suspended_processes           = ["AZRebalance"]
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
       //https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/enable-docker-bridge-network.md
       bootstrap_extra_args = "--enable-docker-bridge true"
-
     }
-
   ]
   tags = merge(local.common_tags,
     map(
@@ -133,7 +132,7 @@ resource "null_resource" "install_istio" {
     command     = "files/install-istio.sh"
     interpreter = ["/bin/bash"]
     environment = {
-      KUBECONFIG      = pathexpand("${path.cwd}/kubeconfig_${local.cluster_name}")
+      KUBECONFIG      = pathexpand("~/.kube/kubeconfig_${local.cluster_name}")
       ISTIO_VERSION   = "1.6.9"
       ISTIO_OVERWRITE = pathexpand("${path.cwd}/${local_file.istio_operator.filename}")
       CERT_ARN        = data.terraform_remote_state.setup.outputs.cert_arn
