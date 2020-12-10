@@ -26,3 +26,16 @@ output "image_pull_secret" {
   local.github_registry_server, kubernetes_secret.github_registry_credentials.metadata[0].name)
 }
 
+output "jx_requirements" {
+  value = module.jx.jx_requirements
+}
+
+output "vault_user_id" {
+  value       = module.jx.vault_user_id
+  description = "The Vault IAM user id"
+}
+
+output "vault_user_secret" {
+  value       = module.jx.vault_user_secret
+  description = "The Vault IAM user secret"
+}

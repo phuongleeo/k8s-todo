@@ -18,6 +18,15 @@ resource "kubernetes_namespace" "monitoring" {
     name = local.namespace[1]
   }
 }
+resource "kubernetes_namespace" "argocd" {
+  metadata {
+    labels = {
+      stack = local.namespace[2]
+    }
+
+    name = local.namespace[2]
+  }
+}
 //Admin cluster
 resource "kubernetes_cluster_role" "cluster_admin" {
   metadata {

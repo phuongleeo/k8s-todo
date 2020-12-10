@@ -61,3 +61,15 @@ data "terraform_remote_state" "vpc" {
 
   workspace = terraform.workspace
 }
+
+data "terraform_remote_state" "key_pair" {
+  backend = "s3"
+
+  config = {
+    bucket = "${var.remote_state_bucket}"
+    key    = "stacks/key-pair"
+    region = "${var.aws_region}"
+  }
+
+  workspace = terraform.workspace
+}
