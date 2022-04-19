@@ -19,3 +19,10 @@ variable "ssh_key_name" {}
 variable "vpc_id" {}
 
 variable "domain_name" {}
+
+variable "dd_api_key" {}
+
+variable "dd_app_key" {}
+
+variable "github_url" {}
+

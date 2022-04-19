@@ -1,0 +1,84 @@
+version: 3
+automerge: true
+delete_source_branch_on_merge: true
+
+projects:
+  # development environment
+  - name: development-applications
+    dir: development/applications
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-cache
+    dir: development/cache
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-cloudfront
+    dir: development/cloudfront
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-eks
+    dir: development/eks
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-iam
+    dir: development/iam
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-key-pair
+    dir: development/key_pair
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-rds
+    dir: development/rds
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-route53
+    dir: development/route53
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-s3
+    dir: development/s3
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-secgroup
+    dir: development/secgroup
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-setup
+    dir: development/setup
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-state
+    dir: development/state
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development
+  - name: development-vpc
+    dir: development/vpc
+    autoplan:
+      when_modified: ['**/*.tf']
+      enabled: true
+    workflow: development

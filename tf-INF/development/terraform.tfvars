@@ -17,3 +17,9 @@ remote_state_bucket = "ap-southeast-1-default-eks-development-state"
 vpc_id = "vpc-xxxxx"
 
 project = "starburst"
+
+dd_api_key = "xxxxx"
+
+dd_app_key = "xxxxx"
+
+github_url = "github.com/phuongleeo/k8s-todo"

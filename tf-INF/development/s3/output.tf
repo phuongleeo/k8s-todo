@@ -9,3 +9,7 @@ output "chart_name" {
 output "chart_arn" {
   value = aws_s3_bucket.chart.arn
 }
+
+output "vault_name" {
+  value = aws_s3_bucket.wizelineos_global_vault.id
+}
