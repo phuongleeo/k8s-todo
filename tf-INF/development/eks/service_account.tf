@@ -149,3 +149,57 @@ resource "aws_iam_policy" "cluster_autoscaler" {
   description = "EKS cluster-autoscaler policy for cluster ${module.eks.cluster_id}"
   policy      = data.aws_iam_policy_document.cas.json
 }
+
+// Vault
+data "aws_iam_policy_document" "vault_prod" {
+  statement {
+    sid = "VaultKMSUnseal"
+
+    actions = [
+      "kms:Encrypt",
+      "kms:Decrypt",
+      "kms:DescribeKey",
+    ]
+
+    resources = [aws_kms_key.vault_prod.arn]
+  }
+  statement {
+    actions = [
+      "s3:*",
+    ]
+
+    resources = [
+      data.terraform_remote_state.s3.outputs.vault_arn,
+      "${data.terraform_remote_state.s3.outputs.vault_arn}/*"
+    ]
+  }
+}
+
+resource "aws_iam_policy" "vault_prod" {
+  name_prefix = "${var.environment}-vault"
+  description = "${var.environment}-vault policy for kms"
+  policy      = data.aws_iam_policy_document.vault_prod.json
+}
+
+module "iam_assumable_role_vault" {
+  source           = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version          = "~> 3.0"
+  create_role      = true
+  role_name        = "${var.environment}-vault"
+  tags             = local.common_tags
+  provider_url     = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns = [aws_iam_policy.vault_prod.arn]
+}
+
+# Atlantis
+
+module "iam_assumable_role_atlantis" {
+  source           = "terraform-aws-modules/iam/aws//modules/iam-assumable-role-with-oidc"
+  version          = "~> 3.0"
+  create_role      = true
+  role_name        = "${var.environment}-atlantis"
+  tags             = local.common_tags
+  provider_url     = replace(module.eks.cluster_oidc_issuer_url, "https://", "")
+  role_policy_arns = [data.aws_iam_policy.atlantis.arn]
+}
+

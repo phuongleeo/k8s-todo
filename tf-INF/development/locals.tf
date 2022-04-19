@@ -23,6 +23,9 @@ locals {
   enable_ingress_nginx   = true
   harbor_enable          = false
   enable_jx              = true
+  enable_atlantis        = false
+  enable_datadog         = false
+  enable_vault           = true
   k8s_efs_driver         = "efs.csi.aws.com"
   quay_registry_server   = "quay.io"
   github_registry_server = "docker.pkg.github.com"

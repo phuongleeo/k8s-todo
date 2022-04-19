@@ -209,3 +209,80 @@ DOCKER
 
   type = "kubernetes.io/dockerconfigjson"
 }
+
+// role for kubernetes-dashboard
+resource "kubernetes_secret" "dashboard" {
+  metadata {
+    name      = "kubernetes-dashboard"
+    namespace = "kubernetes-dashboard"
+    annotations = {
+      "kubernetes.io/service-account.name" = "kubernetes-dashboard"
+    }
+  }
+  type = "kubernetes.io/service-account-token"
+}
+
+resource "kubernetes_service_account" "dashboard" {
+  metadata {
+    name      = "kubernetes-dashboard"
+    namespace = kubernetes_namespace.dashboard.metadata.0.name
+  }
+  secret {
+    name = kubernetes_secret.dashboard.metadata.0.name
+  }
+}
+
+
+resource "kubernetes_role" "dashboard" {
+  metadata {
+    name      = "kubernetes-dashboard-${var.environment}"
+    namespace = var.environment
+  }
+  //Allow run priviledge commands on production namespace
+  rule {
+    api_groups = [""]
+    resources = [
+      "configmaps",
+      "ingresses",
+      "replicasets",
+    ]
+    verbs = ["get", "list", "watch"]
+  }
+  rule {
+    api_groups = ["apps", "batch"]
+    resources = [
+      "cronjobs",
+      "jobs",
+      "deployments",
+      "deployments/scale",
+      "deployments/rollback",
+      "replicasets",
+      "replicasets/scale",
+    "replicasets", ]
+    verbs = ["update"]
+  }
+
+  # allow exec into pod
+  rule {
+    api_groups = [""]
+    resources  = ["pods/log", "pods/portforward"]
+    verbs      = ["create", "get"]
+  }
+}
+
+resource "kubernetes_role_binding" "dashboard" {
+  metadata {
+    name      = "kubernetes-dashboard-${var.environment}"
+    namespace = var.environment
+  }
+  role_ref {
+    api_group = "rbac.authorization.k8s.io"
+    kind      = "Role"
+    name      = kubernetes_role.dashboard.metadata.0.name
+  }
+  subject {
+    kind      = "ServiceAccount"
+    name      = kubernetes_namespace.dashboard.metadata.0.name
+    namespace = kubernetes_namespace.dashboard.metadata.0.name
+  }
+}

@@ -23,7 +23,7 @@ resource "helm_release" "node_termination_handler" {
   name       = "aws-node-termination-handler"
   repository = local.char_repository["eks"]
   chart      = "aws-node-termination-handler"
-  version    = "0.8.0"
+  version    = "0.16.0"
   namespace  = "kube-system"
   lint       = true
   wait       = false
@@ -48,9 +48,9 @@ resource "helm_release" "cluster_autoscaler" {
     null_resource.install_istio
   ]
   name       = "cluster-autoscaler"
-  repository = local.char_repository["stable"]
+  repository = local.char_repository["autoscaler"]
   chart      = "cluster-autoscaler"
-  version    = "7.3.4"
+  version    = "9.10.9"
   namespace  = "kube-system"
   lint       = true
   wait       = false
@@ -68,7 +68,7 @@ resource "helm_release" "cluster_autoscaler" {
   }
 
   set {
-    name  = "rbac.serviceAccountAnnotations.eks\\.amazonaws\\.com/role-arn"
+    name  = "rbac.serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
     value = module.cluster_autoscaler.this_iam_role_arn
   }
   set {
@@ -93,12 +93,12 @@ resource "helm_release" "external_dns" {
     module.eks,
     null_resource.install_istio
   ]
-  name       = "external-dn"
+  name       = "external-dns"
   repository = local.char_repository["bitnami"]
   chart      = "external-dns"
-  version    = "3.2.4"
+  version    = "6.0.2"
   namespace  = kubernetes_namespace.bootstrap.metadata.0.name
-  lint       = true
+  lint       = false
   wait       = false
 
   set {
@@ -115,15 +115,15 @@ resource "helm_release" "external_dns" {
   }
   set {
     name  = "sources"
-    value = "{service,ingress,istio-gateway}"
+    value = "{service,ingress}"
   }
   set {
     name  = "domainFilters"
-    value = "{${local.eks_domain}}"
+    value = "{${var.domain_name}}"
   }
   set {
     name  = "zoneIdFilters"
-    value = "{${data.terraform_remote_state.route53.outputs.eks_zone_id}}"
+    value = "{${data.terraform_remote_state.route53.outputs.zone_id}}"
   }
   set {
     name  = "serviceAccount.annotations.eks\\.amazonaws\\.com/role-arn"
@@ -150,7 +150,7 @@ resource "helm_release" "external_dns" {
   }
   set {
     name  = "annotationFilter"
-    value = "external-dns=enable"
+    value = "external-dns.alpha.kubernetes.io=enable"
   }
   set {
     name  = "interval"
@@ -167,11 +167,50 @@ resource "helm_release" "nginx_ingress" {
   name       = "nginx-ingress"
   repository = local.char_repository["ingress-nginx"]
   chart      = "ingress-nginx"
-  version    = "2.15.0"
+  version    = "3.40.0"
   namespace  = "bootstrap"
   lint       = true
   wait       = false
-
+  set {
+    name  = "controller.replicaCount"
+    value = 1
+  }
+  set {
+    name  = "controller.ingressClassResource.name"
+    value = "nginx"
+  }
+  set {
+    name  = "controller.ingressClassResource.controllerValue"
+    value = "k8s.io/nginx-ingress"
+  }
+  set {
+    name  = "controller.ingressClassResource.enabled"
+    value = "true"
+    type  = "string"
+  }
+  set {
+    name  = "controller.ingressClassByName"
+    value = "true"
+    type  = "string"
+  }
+  set {
+    name  = "controller.service.externalTrafficPolicy"
+    value = "Cluster"
+  }
+  set {
+    name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-proxy-protocol"
+    value = "*"
+  }
+  set {
+    name  = "controller.config.proxy-real-ip-cidr"
+    value = var.cidr_v4
+    type  = "string"
+  }
+  set {
+    name  = "controller.config.use-proxy-protocol"
+    value = "true"
+    type  = "string"
+  }
   set {
     name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-type"
     value = "nlb"
@@ -192,7 +231,7 @@ resource "helm_release" "nginx_ingress" {
   }
   set {
     name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-backend-protocol"
-    value = "http"
+    value = "tcp" # Switch to "http" when externalTrafficPolicy is set to "Local"
   }
   set {
     name  = "controller.service.annotations.service\\.beta\\.kubernetes\\.io/aws-load-balancer-ssl-ports"
@@ -241,18 +280,82 @@ resource "helm_release" "efs_csi" {
 resource "helm_release" "metrics_server" {
   depends_on = [
     module.eks,
-    null_resource.install_istio
   ]
   name       = "metrics-server"
-  repository = local.char_repository["stable"]
+  repository = "https://kubernetes-sigs.github.io/metrics-server/"
   chart      = "metrics-server"
-  version    = "2.11.2"
+  version    = "3.7.0"
   namespace  = "kube-system"
-  lint       = true
+  lint       = false
   wait       = false
   set {
     name  = "args[0]"
     value = "--kubelet-preferred-address-types=InternalIP"
     type  = "string"
+  }
+  set {
+    name  = "rbac.create"
+    value = true
+  }
+}
+resource "helm_release" "kubernetes_dashboard" {
+  depends_on = [
+    module.eks,
+  ]
+  name       = "kubernetes-dashboard"
+  repository = "https://kubernetes.github.io/dashboard/"
+  chart      = "kubernetes-dashboard"
+  version    = "5.0.5"
+  namespace  = kubernetes_namespace.dashboard.metadata.0.name
+  lint       = false
+  wait       = false
+  set {
+    name  = "rbac.create"
+    value = "true"
+  }
+  set {
+    name  = "rbac.clusterReadOnlyRole"
+    value = "true"
+  }
+  set {
+    name  = "ingress.enabled"
+    value = "true"
+  }
+  set {
+    name  = "ingress.hosts"
+    type  = "string"
+    value = "{k8s-dashboard.${var.domain_env}.${var.domain_name}}"
+  }
+  set {
+    name  = "ingress.annotations.kubernetes\\.io/ingress\\.class"
+    value = "internal-nginx"
+  }
+  set {
+    name  = "ingress.className"
+    value = "internal-nginx"
+  }
+  set {
+    name  = "ingress.annotations.external-dns\\.alpha\\.kubernetes\\.io"
+    value = "enable"
+  }
+  set {
+    name  = "settings.clusterName"
+    value = local.cluster_name
+  }
+  set {
+    name  = "settings.itemsPerPage"
+    value = 20
+  }
+  set {
+    name  = "metricsScraper.enabled"
+    value = "true"
+  }
+  set {
+    name  = "serviceAccount.create"
+    value = "false"
+  }
+  set {
+    name  = "serviceAccount.name"
+    value = kubernetes_service_account.dashboard.metadata.0.name
   }
 }

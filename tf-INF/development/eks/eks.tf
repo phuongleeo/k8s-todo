@@ -45,9 +45,9 @@ resource "aws_security_group" "all_worker_mgmt" {
 
 module "eks" {
   source                          = "terraform-aws-modules/eks/aws"
-  version                         = "13.0.0"
+  version                         = "16.0.0"
   cluster_name                    = local.cluster_name
-  cluster_version                 = "1.17"
+  cluster_version                 = "1.21"
   subnets                         = data.terraform_remote_state.vpc.outputs.subnet_private
   vpc_id                          = data.terraform_remote_state.vpc.outputs.vpc_id
   write_kubeconfig                = true
@@ -80,7 +80,24 @@ module "eks" {
       additional_security_group_ids = [aws_security_group.worker_group_mgmt_one.id]
       //https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/enable-docker-bridge-network.md
       bootstrap_extra_args = "--enable-docker-bridge true"
-    }
+    },
+    {
+      name                                     = "on-demand-vault"
+      override_instance_types                  = ["t3a.medium", "t3a.large"]
+      root_volume_size                         = "20"
+      on_demand_base_capacity                  = 3
+      on_demand_percentage_above_base_capacity = 100
+      asg_max_size                             = 3
+      asg_min_size                             = 1
+      asg_desired_capacity                     = 3
+      key_name                                 = data.terraform_remote_state.key_pair.outputs.key_name
+      kubelet_extra_args                       = "--node-labels=node.kubernetes.io/lifecycle=normal,application=vault --register-with-taints=application=vault:NoExecute"
+      additional_userdata                      = data.template_file.pod_restrict.rendered
+      suspended_processes                      = ["AZRebalance"]
+      additional_security_group_ids            = []
+      //https://github.com/terraform-aws-modules/terraform-aws-eks/blob/master/docs/enable-docker-bridge-network.md
+      bootstrap_extra_args = "--enable-docker-bridge true"
+    },
   ]
   tags = merge(local.common_tags,
     map(
